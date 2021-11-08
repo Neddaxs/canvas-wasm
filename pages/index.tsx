@@ -14,7 +14,7 @@ export default function Home() {
         style={{
           width: "100vw",
           height: "100vh",
-          padding: "2em"
+          padding: "2em",
         }}
       >
         <Canvas />
