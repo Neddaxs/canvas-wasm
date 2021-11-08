@@ -8,7 +8,6 @@ export default memo(function Canvas(): JSX.Element {
     if (root) {
       const cleanup = chess(root)
       return function onunmount(): void {
-        console.log("unmounting");
         cleanup();
       };
     }

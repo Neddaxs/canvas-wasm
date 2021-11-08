@@ -17,7 +17,6 @@ export default function chess(root: HTMLDivElement): () => void {
   };
 
   window.onresize = function (): void {
-    console.log("hi carter");
     const { offsetWidth, offsetHeight } = root;
 
     if (offsetWidth > offsetHeight) {
@@ -53,7 +52,6 @@ export default function chess(root: HTMLDivElement): () => void {
       3 * state.aspect
     );
 
-    console.log("drawing rectangle");
     state.ctx.fillRect(
       5 * state.aspect,
       5 * state.aspect,
