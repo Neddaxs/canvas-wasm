@@ -1,12 +1,15 @@
 import { memo, useEffect, useState } from "react";
+import chess from "../../utils/chess/chess.func";
 
 export default memo(function Canvas(): JSX.Element {
   const [root, setRoot] = useState<HTMLDivElement>(null);
 
   useEffect(() => {
     if (root) {
+      const cleanup = chess(root)
       return function onunmount(): void {
         console.log("unmounting");
+        cleanup();
       };
     }
   }, [root]);
