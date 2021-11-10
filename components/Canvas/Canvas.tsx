@@ -6,7 +6,7 @@ export default memo(function Canvas(): JSX.Element {
 
   useEffect(() => {
     if (root) {
-      const cleanup = chess(root)
+      const cleanup = chess(root);
       return function onunmount(): void {
         cleanup();
       };
@@ -14,14 +14,16 @@ export default memo(function Canvas(): JSX.Element {
   }, [root]);
 
   return (
-    <div
-      ref={(el) => setRoot(el)}
-      style={{
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        border: "1px solid black",
-      }}
-    />
+    <div style={{ flex: "1 1 100%" }}>
+      <div
+        ref={(el) => setRoot(el)}
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          border: "1px solid black",
+        }}
+      />
+    </div>
   );
 });
