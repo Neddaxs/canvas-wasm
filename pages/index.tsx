@@ -1,5 +1,8 @@
 import Head from "next/head";
 import Canvas from "../components/Canvas/Canvas";
+// import Appbar from "../components/Appbar/Appbar";
+// import GAME from "../types/GAME.enum";
+// import { useState } from "react";
 
 import useWasm from "hooks/useWasm";
 
@@ -19,8 +22,11 @@ export default function Home() {
           width: "100vw",
           height: "100vh",
           padding: "2em",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
+        {/* <Appbar currentGame={currentGame} setCurrentGame={setCurrentGame} /> */}
         <Canvas />
       </main>
     </>
