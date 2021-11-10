@@ -1,12 +1,12 @@
 import { memo, useEffect, useState } from "react";
-import chess from "../../utils/chess/chess.func";
+import snake from "../../utils/snake/snake.func";
 
 export default memo(function Canvas(): JSX.Element {
   const [root, setRoot] = useState<HTMLDivElement>(null);
 
   useEffect(() => {
     if (root) {
-      const cleanup = chess(root);
+      const cleanup = snake(root);
       return function onunmount(): void {
         cleanup();
       };
