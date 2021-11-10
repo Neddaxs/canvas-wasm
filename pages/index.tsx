@@ -1,7 +1,11 @@
 import Head from "next/head";
 import Canvas from "../components/Canvas/Canvas";
 
+import useWasm from "hooks/useWasm";
+
 export default function Home() {
+  const wasm = useWasm();
+  console.log(wasm.add(1, 2));
   return (
     <>
       <Head>
