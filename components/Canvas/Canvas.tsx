@@ -7,7 +7,9 @@ export default memo(function Canvas(): JSX.Element {
   useEffect(() => {
     if (wasm) {
       const cleanup = wasm.snake("snake-canvas-parent");
-      return () => cleanup;
+      return (): void => {
+        cleanup();
+      };
     }
   }, [wasm]);
 
