@@ -7,19 +7,68 @@ extern crate web_sys;
 
 struct State {
     clicks: i32,
-    ctx: CanvasRenderingContext2d,
     aspect: i32,
+    ctx: Option<CanvasRenderingContext2d>,
 }
 
 impl State {
-    fn click(&self) {
+    fn click(&mut self) {
         self.clicks += 1;
     }
-    fn set_aspect(&self, ratio: i32) {
-        self.aspect = ratio;
+    fn set_ctx(&mut self, ctx: CanvasRenderingContext2d) {
+        self.ctx = Some(ctx);
     }
-    fn set_ctx(&self, ctx: CanvasRenderingContext2d) {
-        self.ctx = ctx;
+}
+
+const STATE: State = State {
+    clicks: 0,
+    ctx: None,
+    aspect: 1,
+};
+
+fn render() {
+    match STATE.ctx {
+        Some(ctx) => {
+            ctx.rect(
+                0.0,
+                0.0,
+                ctx.canvas().unwrap().offset_width().into(),
+                ctx.canvas().unwrap().offset_height().into(),
+            );
+
+            let x = (5 * STATE.aspect).into();
+            let y = (3 * STATE.aspect).into();
+
+            let rendered_text = ctx.fill_text(STATE.clicks.to_string().as_str(), x, y);
+            assert_eq!(rendered_text.is_ok(), true);
+
+            ctx.fill_rect(x, x, x, x);
+        }
+        _ => {}
+    }
+}
+
+fn handle_onclick() {
+    STATE.click();
+    render();
+}
+
+fn handle_resize() {
+    match STATE.ctx {
+        Some(ctx) => {
+            let offset_width = ctx.canvas().unwrap().offset_width().try_into().unwrap();
+            let offset_height = ctx.canvas().unwrap().offset_height().try_into().unwrap();
+
+            if offset_width > offset_height {
+                ctx.canvas().unwrap().set_width(offset_height);
+                ctx.canvas().unwrap().set_height(offset_height);
+            } else {
+                ctx.canvas().unwrap().set_width(offset_width);
+                ctx.canvas().unwrap().set_height(offset_width);
+            }
+            render()
+        }
+        _ => {}
     }
 }
 
@@ -43,65 +92,20 @@ pub fn run(canvas_id: &str) -> impl FnOnce() {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
-    let mut state = State {
-        clicks: 0,
-        ctx: context,
-        aspect: 1,
-    };
+    STATE.set_ctx(context);
 
     let append = parent_container.append_child(canvas_node.clone().deref());
     assert_eq!(append.is_ok(), true);
 
-    let render = || {
-        state.ctx.rect(
-            0.0,
-            0.0,
-            state.ctx.canvas().unwrap().offset_width().into(),
-            state.ctx.canvas().unwrap().offset_height().into(),
-        );
-
-        let x = (5 * state.aspect).into();
-        let y = (3 * state.aspect).into();
-
-        let rendered_text = state.ctx.fill_text(state.clicks.to_string().as_str(), x, y);
-        assert_eq!(rendered_text.is_ok(), true);
-
-        state.ctx.fill_rect(x, x, x, x);
-    };
-
-    let onresize = EventListener::new(&window, "resize", |_event| {
-        let offset_width = state
-            .ctx
-            .canvas()
-            .unwrap()
-            .offset_width()
-            .try_into()
-            .unwrap();
-        let offset_height = state
-            .ctx
-            .canvas()
-            .unwrap()
-            .offset_height()
-            .try_into()
-            .unwrap();
-
-        if offset_width > offset_height {
-            state.ctx.canvas().unwrap().set_width(offset_height);
-            state.ctx.canvas().unwrap().set_height(offset_height);
-        } else {
-            state.ctx.canvas().unwrap().set_width(offset_width);
-            state.ctx.canvas().unwrap().set_height(offset_width);
-        }
-        render()
-    });
+    let onresize = EventListener::new(&window, "resize", |_event| handle_resize());
 
     let onclick = EventListener::new(&canvas, "onclick", |_event| {
-        state.click();
-        render();
+        handle_onclick();
     });
 
     let cleanup = move || {
         onclick.forget();
+        onresize.forget();
         let removed = parent_container.remove_child(canvas_node.clone().deref());
         assert_eq!(removed.is_ok(), true);
     };
