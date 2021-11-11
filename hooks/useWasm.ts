@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
+import * as wasmPackage from "rust/pkg";
+
 const useWasm = () => {
-  const [state, setState] = useState(null);
+  const [state, setState] = useState<typeof wasmPackage>(null);
   useEffect(() => {
     const fetchWasm = async () => {
-      const wasm = await import("rust/pkg");
+      const wasm = wasmPackage;
       setState(wasm);
     };
     fetchWasm();

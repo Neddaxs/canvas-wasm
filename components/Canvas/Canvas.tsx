@@ -1,22 +1,22 @@
-import { memo, useEffect, useState } from "react";
-import snake from "../../utils/snake/snake.func";
+import { memo, useEffect } from "react";
+import useWasm from "hooks/useWasm";
 
 export default memo(function Canvas(): JSX.Element {
-  const [root, setRoot] = useState<HTMLDivElement>(null);
+  const wasm = useWasm();
 
   useEffect(() => {
-    if (root) {
-      const cleanup = snake(root);
-      return function onunmount(): void {
+    if (wasm) {
+      const cleanup = wasm.snake("snake-canvas-parent");
+      return (): void => {
         cleanup();
       };
     }
-  }, [root]);
+  }, [wasm]);
 
   return (
     <div style={{ flex: "1 1 100%" }}>
       <div
-        ref={(el) => setRoot(el)}
+        id="snake-canvas-parent"
         style={{
           width: "100%",
           height: "100%",
