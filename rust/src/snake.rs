@@ -1,6 +1,10 @@
 use gloo_events::EventListener;
-use std::ops::Deref;
-use wasm_bindgen::JsCast;
+use std::{
+    cell::{Cell, RefCell},
+    ops::Deref,
+    rc::Rc,
+};
+use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::CanvasRenderingContext2d;
 
 extern crate web_sys;
@@ -8,107 +12,96 @@ extern crate web_sys;
 struct State {
     clicks: i32,
     aspect: i32,
-    ctx: Option<CanvasRenderingContext2d>,
+    ctx: Box<CanvasRenderingContext2d>,
 }
 
 impl State {
-    fn click(&mut self) {
-        self.clicks += 1;
-    }
-    fn set_ctx(&mut self, ctx: CanvasRenderingContext2d) {
-        self.ctx = Some(ctx);
-    }
-}
-
-const STATE: State = State {
-    clicks: 0,
-    ctx: None,
-    aspect: 1,
-};
-
-fn render() {
-    match STATE.ctx {
-        Some(ctx) => {
-            ctx.rect(
-                0.0,
-                0.0,
-                ctx.canvas().unwrap().offset_width().into(),
-                ctx.canvas().unwrap().offset_height().into(),
-            );
-
-            let x = (5 * STATE.aspect).into();
-            let y = (3 * STATE.aspect).into();
-
-            let rendered_text = ctx.fill_text(STATE.clicks.to_string().as_str(), x, y);
-            assert_eq!(rendered_text.is_ok(), true);
-
-            ctx.fill_rect(x, x, x, x);
-        }
-        _ => {}
+    fn render(&mut self) {
+        let ctx = self.ctx.as_mut();
+        ctx.set_fill_style(&JsValue::from_str("red"));
+        ctx.fill_rect(10.0, 10.0, 100.0, 100.0);
     }
 }
 
-fn handle_onclick() {
-    STATE.click();
-    render();
-}
-
-fn handle_resize() {
-    match STATE.ctx {
-        Some(ctx) => {
-            let offset_width = ctx.canvas().unwrap().offset_width().try_into().unwrap();
-            let offset_height = ctx.canvas().unwrap().offset_height().try_into().unwrap();
-
-            if offset_width > offset_height {
-                ctx.canvas().unwrap().set_width(offset_height);
-                ctx.canvas().unwrap().set_height(offset_height);
-            } else {
-                ctx.canvas().unwrap().set_width(offset_width);
-                ctx.canvas().unwrap().set_height(offset_width);
-            }
-            render()
-        }
-        _ => {}
-    }
-}
-
-pub fn run(canvas_id: &str) -> impl FnOnce() {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
-
-    let parent_container = document.get_element_by_id(canvas_id).unwrap();
-
-    let canvas_node = document.get_element_by_id("canvas").unwrap();
-
-    let canvas = canvas_node
-        .clone()
-        .dyn_into::<web_sys::HtmlCanvasElement>()
-        .unwrap();
+/// Runs the snake game
+///
+/// # Arguments
+///
+/// * `canvas_id` - the string of the canvas element to use
+///
+/// # Errors
+///
+/// Returns nothing is everything went fine, or an javascript value if there was an error
+///
+/// # Examples
+///
+/// ```
+/// snake::run("my-canvas-id")?
+/// ```
+pub fn run(canvas_id: &str) -> Result<(), JsValue> {
+    let document = web_sys::window().unwrap().document().unwrap();
+    let canvas = document
+        .get_element_by_id(canvas_id)
+        .unwrap()
+        .dyn_into::<web_sys::HtmlCanvasElement>()?;
 
     let context = canvas
-        .get_context("2d")
+        .get_context("2d")?
         .unwrap()
-        .unwrap()
-        .dyn_into::<web_sys::CanvasRenderingContext2d>()
-        .unwrap();
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()?;
 
-    STATE.set_ctx(context);
+    let context = Box::new(context);
 
-    let append = parent_container.append_child(canvas_node.clone().deref());
-    assert_eq!(append.is_ok(), true);
+    {
+        let context = context.clone();
+        let state = Rc::new(RefCell::new(State {
+            clicks: 0,
+            aspect: 0,
+            ctx: context,
+        }));
 
-    let onresize = EventListener::new(&window, "resize", |_event| handle_resize());
+        {
+            let state = state.clone();
+            let callback = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+                let mut s = state.borrow_mut();
+                s.clicks += 1;
+                s.render();
+            }) as Box<dyn FnMut(_)>);
+            canvas
+                .add_event_listener_with_callback("onclick", callback.as_ref().unchecked_ref())?;
+            callback.forget();
+        }
 
-    let onclick = EventListener::new(&canvas, "onclick", |_event| {
-        handle_onclick();
-    });
+        // {
+        //     let state = state.clone();
+        // }
+    }
 
-    let cleanup = move || {
-        onclick.forget();
-        onresize.forget();
-        let removed = parent_container.remove_child(canvas_node.clone().deref());
-        assert_eq!(removed.is_ok(), true);
-    };
+    // {
+    //     let context = context.clone();
+    //     let pressed = pressed.clone();
+    //     let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+    //         if pressed.get() {
+    //             context.line_to(event.offset_x() as f64, event.offset_y() as f64);
+    //             context.stroke();
+    //             context.begin_path();
+    //             context.move_to(event.offset_x() as f64, event.offset_y() as f64);
+    //         }
+    //     }) as Box<dyn FnMut(_)>);
+    //     canvas.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref())?;
+    //     closure.forget();
+    // }
+    // {
+    //     let context = context.clone();
+    //     let pressed = pressed.clone();
+    //     let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+    //         pressed.set(false);
+    //         context.line_to(event.offset_x() as f64, event.offset_y() as f64);
+    //         context.stroke();
+    //     }) as Box<dyn FnMut(_)>);
+    //     canvas.add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref())?;
+    //     closure.forget();
+    // }
 
-    return cleanup;
+    Ok(())
 }

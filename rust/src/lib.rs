@@ -7,6 +7,15 @@ pub fn add(num1: i32, num2: i32) -> i32 {
 }
 
 #[wasm_bindgen]
-pub fn snake(canvas_id: &str) {
-    snake::run(canvas_id);
+pub fn snake(canvas_id: &str) -> Result<(), JsValue> {
+    match snake::run(canvas_id) {
+        Ok(()) => {
+            println!("Everything ran fine!");
+            Ok(())
+        }
+        Err(e) => {
+            println!("ERROR, SNAKE: {:?}", e);
+            Err(e)
+        }
+    }
 }
