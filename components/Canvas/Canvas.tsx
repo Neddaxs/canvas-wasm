@@ -1,22 +1,20 @@
-import { memo, useEffect, useState } from "react";
-import chess from "../../utils/chess/chess.func";
+import { memo, useEffect } from "react";
+import useWasm from "hooks/useWasm";
 
 export default memo(function Canvas(): JSX.Element {
-  const [root, setRoot] = useState<HTMLDivElement>(null);
+  const wasm = useWasm();
 
   useEffect(() => {
-    if (root) {
-      const cleanup = chess(root);
-      return function onunmount(): void {
-        cleanup();
-      };
+    if (wasm) {
+      const cleanup = wasm.snake("snake-canvas-parent");
+      return () => cleanup;
     }
-  }, [root]);
+  }, [wasm]);
 
   return (
     <div style={{ flex: "1 1 100%" }}>
       <div
-        ref={(el) => setRoot(el)}
+        id="snake-canvas-parent"
         style={{
           width: "100%",
           height: "100%",

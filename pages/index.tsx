@@ -4,11 +4,7 @@ import Canvas from "../components/Canvas/Canvas";
 // import GAME from "../types/GAME.enum";
 // import { useState } from "react";
 
-import useWasm from "hooks/useWasm";
-
 export default function Home() {
-  const wasm = useWasm();
-  console.log(wasm.add(1, 2));
   return (
     <>
       <Head>
