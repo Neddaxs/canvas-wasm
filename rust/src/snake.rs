@@ -11,6 +11,18 @@ struct State {
     aspect: i32,
 }
 
+impl State {
+    fn click(&self) {
+        self.clicks += 1;
+    }
+    fn set_aspect(&self, ratio: i32) {
+        self.aspect = ratio;
+    }
+    fn set_ctx(&self, ctx: CanvasRenderingContext2d) {
+        self.ctx = ctx;
+    }
+}
+
 pub fn run(canvas_id: &str) -> impl FnOnce() {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
@@ -40,7 +52,7 @@ pub fn run(canvas_id: &str) -> impl FnOnce() {
     let append = parent_container.append_child(canvas_node.clone().deref());
     assert_eq!(append.is_ok(), true);
 
-    let render = move || {
+    let render = || {
         state.ctx.rect(
             0.0,
             0.0,
@@ -84,7 +96,7 @@ pub fn run(canvas_id: &str) -> impl FnOnce() {
     });
 
     let onclick = EventListener::new(&canvas, "onclick", |_event| {
-        state.clicks = state.clicks + 1;
+        state.click();
         render();
     });
 
