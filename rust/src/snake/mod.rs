@@ -13,6 +13,21 @@ extern "C" {
 }
 
 pub fn run(parent_id: &str) -> Result<(), JsValue> {
+    // TODO
+    // decide how we want out snake game to actually function
+    //      o events
+    //          onresize: emit(EVENT.RESIZE, ())
+    //          onclick: emit(EVENT.CLICKED, ClickData {})
+    //
+    //      o functions
+    //          canvas.onclick = wrap(onclick, render)
+    //          window.onkeypress = onkeypress
+    //          interval(wrap(update, render))
+    //
+    //      o observable?
+    //          useEffect(() => manager::update(&state), [state]);
+    //          useInterval(manager::render(), 1000.0 / 8.0);
+
     // web_sys::window() gives us the "window" object from javascript
     // (in an option, ie:
     //  Option(window)
