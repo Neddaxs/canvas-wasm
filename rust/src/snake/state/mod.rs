@@ -2,7 +2,7 @@ use wasm_bindgen::JsValue;
 use web_sys::CanvasRenderingContext2d;
 
 pub struct State {
-    clicks: i32,
+    pub clicks: i32,
     aspect: i32,
     pub ctx: Box<CanvasRenderingContext2d>,
 }

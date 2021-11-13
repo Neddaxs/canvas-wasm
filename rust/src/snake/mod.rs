@@ -1,71 +1,38 @@
+use wasm_bindgen::JsValue;
+
+mod init;
 mod state;
-use std::{cell::RefCell, rc::Rc};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+mod utils;
 
 extern crate web_sys;
 
-// give us console.log
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
+pub fn run(root_id: &str) {
+    utils::logger::info("snake running!");
 
-pub fn run(parent_id: &str) -> Result<(), JsValue> {
-    // TODO
-    // decide how we want out snake game to actually function
-    //      o events
-    //          onresize: emit(EVENT.RESIZE, ())
-    //          onclick: emit(EVENT.CLICKED, ClickData {})
-    //
-    //      o functions
-    //          canvas.onclick = wrap(onclick, render)
-    //          window.onkeypress = onkeypress
-    //          interval(wrap(update, render))
-    //
-    //      o observable?
-    //          useEffect(() => manager::update(&state), [state]);
-    //          useInterval(manager::render(), 1000.0 / 8.0);
+    match init::InitData::new(root_id) {
+        Ok(init_data) => {
+            utils::logger::info("Successfully initialized data!");
 
-    // web_sys::window() gives us the "window" object from javascript
-    // (in an option, ie:
-    //  Option(window)
-    // )
-    // unwrap just says, assume that my option was successful and give me that value
-    //
-    // TODO: remove all unwraps and properly handle them or even just log and panic again so we can
-    // do some simple debugging
-    let document = web_sys::window().unwrap().document().unwrap();
-    let div = document.get_element_by_id(parent_id).unwrap();
+            init_data.ctx.set_fill_style(&JsValue::from_str("orange"));
+            init_data.ctx.fill_rect(19.0, 20.0, 300.0, 100.0);
 
-    log("snake running!");
+            let boxed_ctx = Box::new(init_data.ctx);
 
-    let canvas = document
-        .create_element("canvas")
-        .unwrap()
-        // dyn_into takes the value, and AT RUN TIME, tries to turn it unto the given type
-        // in this case, we are saying something like this:
-        // ```
-        // const canvas = createCanvas();
-        //
-        // function createCanvas() {
-        //  const canvas = document.createElement('canvas'); // implicitly HTMLElement
-        //  validateThatThisIsAnActualCanvasElement(canvas);
-        //  return canvas;
-        // }
-        // ```
-        .dyn_into::<web_sys::HtmlCanvasElement>()
-        .unwrap();
+            let mut s = state::State::new(boxed_ctx);
 
-    // the )? in this case is a way of saying, throw an error if this fails, if its not here, rust
-    // will make use handle the potential error
-    div.append_child(&canvas)?;
+            utils::logger::info(&format!("state has clicks: {}", s.clicks));
 
-    let context = canvas
-        .get_context("2d")?
-        .unwrap()
-        .dyn_into::<web_sys::CanvasRenderingContext2d>()?;
+            s.click();
+
+            utils::logger::info(&format!("state has clicks: {}", s.clicks));
+
+            utils::logger::info(&format!("state has width: {}", init_data.canvas.width()));
+
+            s.render();
+        }
+        Err(e) => utils::logger::error(&format!("Error: {:?}", e)),
+    }
+    /*
 
     // Boxes are essentially a cpp unique_pointer,
     // in other words
@@ -142,4 +109,5 @@ pub fn run(parent_id: &str) -> Result<(), JsValue> {
     }
 
     Ok(())
+    */
 }
