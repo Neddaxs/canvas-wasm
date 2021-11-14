@@ -3,6 +3,7 @@ use web_sys::CanvasRenderingContext2d;
 
 pub struct State {
     pub clicks: i32,
+    pub grow: bool,
     aspect: i32,
     pub ctx: Box<CanvasRenderingContext2d>,
 }
@@ -12,6 +13,7 @@ impl State {
         State {
             clicks: 0,
             aspect: 0,
+            grow: true,
             ctx,
         }
     }
@@ -19,7 +21,8 @@ impl State {
     pub fn render(&mut self) {
         let ctx = self.ctx.as_mut();
         ctx.set_fill_style(&JsValue::from_str("red"));
-        ctx.fill_rect(10.0, 10.0, 100.0, 100.0);
+        let offset = self.clicks as f64;
+        ctx.fill_rect(10.0 + offset, 10.0 + offset, 100.0, 100.0);
     }
 
     pub fn click(&mut self) {
