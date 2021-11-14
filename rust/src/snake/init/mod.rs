@@ -12,9 +12,7 @@ pub struct InitData {
 
 impl InitData {
     pub fn new(root_id: &str) -> Result<InitData, error::InitError> {
-        let window = web_sys::window().ok_or_else(|| {
-            return error::InitError::GetWindowError;
-        })?;
+        let window = web_sys::window().ok_or_else(|| error::InitError::GetWindowError)?;
 
         let document = window.document().ok_or_else(|| {
             return error::InitError::GetDocumentError;
