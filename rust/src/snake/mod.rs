@@ -2,6 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use wasm_bindgen::{prelude::Closure, JsCast};
 
+mod game_state;
 mod init;
 mod state;
 mod utils;
@@ -35,6 +36,8 @@ pub fn run(root_id: &str) {
     match init::InitData::new(root_id) {
         Ok(init_data) => {
             utils::logger::info("Successfully initialized data!");
+
+            let _game_state = game_state::State::new(None);
 
             let boxed_ctx = Box::new(init_data.ctx);
             let state_ref = Rc::new(RefCell::new(state::State::new(boxed_ctx)));
