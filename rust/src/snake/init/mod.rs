@@ -39,6 +39,7 @@ impl InitData {
 
         canvas.set_width(root.offset_width().try_into().unwrap());
         canvas.set_height(root.offset_height().try_into().unwrap());
+        canvas.set_tab_index(1);
 
         let ctx = match canvas
             .get_context("2d")

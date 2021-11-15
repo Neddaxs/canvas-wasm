@@ -1,8 +1,12 @@
+use std::{cell::RefCell, rc::Rc};
+
 use wasm_bindgen::JsValue;
 
 use super::{game_state, init};
 
-pub fn render(init_data: &init::InitData, state: &game_state::State) {
+pub fn render(init_data_ref: &Rc<RefCell<init::InitData>>, state: &game_state::State) {
+    let init_data = init_data_ref.clone().borrow();
+
     let ctx = &init_data.ctx;
 
     let tile_width = game_state::tile_size() as f64;
