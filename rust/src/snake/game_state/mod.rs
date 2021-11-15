@@ -1,5 +1,7 @@
 use core::fmt;
 use core::result::Result;
+use rand::thread_rng;
+use rand::Rng;
 
 const GAME_WIDTH: i32 = 32;
 const GAME_SIZE: usize = (GAME_WIDTH * GAME_WIDTH) as usize;
@@ -53,9 +55,7 @@ impl State {
     pub fn new(previous_best: Option<i32>) -> State {
         let mut board = [Tile::EMPTY; GAME_SIZE];
 
-        // let num = rand::thread_rng().gen_range(0..GAME_SIZE);
-
-        let snake_position = 800;
+        let snake_position = thread_rng().gen_range(0..GAME_SIZE);
 
         board[snake_position] = Tile::SNAKE;
 

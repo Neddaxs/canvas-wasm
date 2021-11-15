@@ -12,6 +12,9 @@ crate-type = ["cdylib"]
 wasm-bindgen = "0.2.78"
 gloo-events = "0.1.1"
 rand = "0.8"
+# We enable it only for web-wasm check
+# See https://docs.rs/getrandom/0.2.1/getrandom/#webassembly-support
+getrandom = { version = "0.2", features = ["js"] }
 
 [dependencies.web-sys]
 version = "0.3.55"

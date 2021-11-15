@@ -31,9 +31,11 @@ pub fn run(root_id: &str) {
     //      render()
     //  }
 
+    /*
     std::thread::spawn(move || loop {
         utils::logger::error(&format!("Error: {:?}", ""))
     });
+    */
 
     match init::InitData::new(root_id) {
         Ok(init_data) => {
@@ -46,19 +48,20 @@ pub fn run(root_id: &str) {
 
             // KeyDown
             {
-                let cloned_state = state_ref.clone();
+                let cloned_state_ref = state_ref.clone();
 
                 let key_press_callback =
                     Closure::wrap(Box::new(move |event: web_sys::KeyboardEvent| {
                         utils::logger::info("keydown");
                         event.prevent_default();
-                        let mut s = cloned_state.borrow_mut();
+
+                        let mut s = cloned_state_ref.borrow_mut();
                         let key = utils::keys::get_key(event.key().as_str());
                         utils::logger::info(&format!("{:?}", key));
                         s.change_direction(key);
                     }) as Box<dyn FnMut(_)>);
 
-                match init_data.canvas.add_event_listener_with_callback(
+                match init_data.window.add_event_listener_with_callback(
                     "keydown",
                     key_press_callback.as_ref().unchecked_ref(),
                 ) {
@@ -78,7 +81,7 @@ pub fn run(root_id: &str) {
                 }) as Box<dyn FnMut(_)>);
 
                 match init_data.canvas.add_event_listener_with_callback(
-                    "onclick",
+                    "click",
                     onclick_callback.as_ref().unchecked_ref(),
                 ) {
                     Err(e) => utils::logger::error(&format!("Error: {:?}", e)),
