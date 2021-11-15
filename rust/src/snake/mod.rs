@@ -4,6 +4,7 @@ use wasm_bindgen::{prelude::Closure, JsCast};
 
 mod game_state;
 mod init;
+mod renderer;
 mod state;
 mod utils;
 
@@ -41,10 +42,13 @@ pub fn run(root_id: &str) {
         Ok(init_data) => {
             utils::logger::info("Successfully initialized data!");
 
-            let _game_state = game_state::State::new(None);
+            let game_state = game_state::State::new(None);
 
             let boxed_ctx = Box::new(init_data.ctx);
+
             let state_ref = Rc::new(RefCell::new(state::State::new(boxed_ctx)));
+
+            renderer::render(&init_data, &game_state);
 
             // KeyDown
             {
@@ -90,6 +94,7 @@ pub fn run(root_id: &str) {
             }
 
             // Renderer
+            /*
             {
                 let cloned_state = state_ref.clone();
                 let mut s = cloned_state.borrow_mut();
@@ -99,6 +104,7 @@ pub fn run(root_id: &str) {
                     sleep(Duration::new(SLEEPER_TIMEOUT, 0));
                 }
             }
+            */
         }
         Err(e) => utils::logger::error(&format!("Error: {:?}", e)),
     }

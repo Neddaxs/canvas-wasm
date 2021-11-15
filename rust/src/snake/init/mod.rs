@@ -8,6 +8,7 @@ pub struct InitData {
     pub root: web_sys::HtmlDivElement,
     pub canvas: web_sys::HtmlCanvasElement,
     pub ctx: web_sys::CanvasRenderingContext2d,
+    pub aspect: i32,
 }
 
 impl InitData {
@@ -58,12 +59,25 @@ impl InitData {
             _ => {}
         }
 
-        Ok(InitData {
+        let init_data = InitData {
             window,
             document,
             root,
             canvas,
             ctx,
-        })
+            aspect: 0,
+        };
+
+        init_data.update_aspect();
+
+        Ok(init_data)
+    }
+
+    fn update_aspect(&self) {
+        self.aspect = if self.canvas.offset_width() == 0 {
+            1
+        } else {
+            self.canvas.offset_width() / 100
+        }
     }
 }
