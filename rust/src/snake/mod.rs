@@ -72,11 +72,11 @@ pub fn run(root_id: &str) {
 
             // OnClick
             {
-                let cloned_state = state_ref.clone();
+                let cloned_state_ref = state_ref.clone();
 
                 let onclick_callback = Closure::wrap(Box::new(move |_event: web_sys::Event| {
                     utils::logger::info("click");
-                    let mut s = cloned_state.borrow_mut();
+                    let mut s = cloned_state_ref.borrow_mut();
                     s.toggle_game();
                 }) as Box<dyn FnMut(_)>);
 
