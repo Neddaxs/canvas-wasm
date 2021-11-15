@@ -50,7 +50,10 @@ pub fn run(root_id: &str) {
             let boxed_canvas = Box::new(init_data.canvas);
             let canvas_ref = Rc::new(RefCell::new(boxed_canvas));
 
-            events::listeners::register(&canvas_ref, &state_ref);
+            let root = Box::new(init_data.root);
+            let root_ref = Rc::new(RefCell::new(root));
+
+            events::listeners::register(&canvas_ref, &state_ref, &root_ref);
 
             // Renderer
             {
