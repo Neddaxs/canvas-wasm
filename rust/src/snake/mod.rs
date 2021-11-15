@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, thread::sleep, time::Duration};
 
 use wasm_bindgen::{prelude::Closure, JsCast};
 
@@ -8,6 +8,8 @@ mod state;
 mod utils;
 
 extern crate web_sys;
+
+const SLEEPER_TIMEOUT: u64 = 1;
 
 pub fn run(root_id: &str) {
     utils::logger::info("snake running!");
@@ -42,34 +44,56 @@ pub fn run(root_id: &str) {
             let boxed_ctx = Box::new(init_data.ctx);
             let state_ref = Rc::new(RefCell::new(state::State::new(boxed_ctx)));
 
+            // KeyDown
             {
-                let cloned_state_ref = state_ref.clone();
+                let cloned_state = state_ref.clone();
 
-                let callback = Closure::wrap(Box::new(move |_event: web_sys::Event| {
-                    let mut s = cloned_state_ref.borrow_mut();
-                    s.grow = !s.grow;
-                    s.click();
-                    s.render();
-                }) as Box<dyn FnMut(_)>);
+                let key_press_callback =
+                    Closure::wrap(Box::new(move |event: web_sys::KeyboardEvent| {
+                        utils::logger::info("keydown");
+                        event.prevent_default();
+                        let mut s = cloned_state.borrow_mut();
+                        let key = utils::keys::get_key(event.key().as_str());
+                        utils::logger::info(&format!("{:?}", key));
+                        s.change_direction(key);
+                    }) as Box<dyn FnMut(_)>);
 
-                match init_data
-                    .canvas
-                    .add_event_listener_with_callback("click", callback.as_ref().unchecked_ref())
-                {
+                match init_data.canvas.add_event_listener_with_callback(
+                    "keydown",
+                    key_press_callback.as_ref().unchecked_ref(),
+                ) {
                     Err(e) => utils::logger::error(&format!("Error: {:?}", e)),
-                    Ok(_) => callback.forget(),
+                    Ok(_) => key_press_callback.forget(),
                 }
             }
 
+            // OnClick
             {
-                utils::logger::info(&format!("A: {}", state_ref.borrow().clicks));
+                let cloned_state = state_ref.clone();
 
-                for _ in 0..50 {
-                    let mut s = state_ref.borrow_mut();
-                    utils::logger::info(&format!("Loop: {}", s.clicks));
-                    s.click();
+                let onclick_callback = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+                    utils::logger::info("click");
+                    let mut s = cloned_state.borrow_mut();
+                    s.toggle_game();
+                }) as Box<dyn FnMut(_)>);
+
+                match init_data.canvas.add_event_listener_with_callback(
+                    "onclick",
+                    onclick_callback.as_ref().unchecked_ref(),
+                ) {
+                    Err(e) => utils::logger::error(&format!("Error: {:?}", e)),
+                    Ok(_) => onclick_callback.forget(),
+                }
+            }
+
+            // Renderer
+            {
+                let cloned_state = state_ref.clone();
+                let mut s = cloned_state.borrow_mut();
+                while s.active {
+                    utils::logger::info("Render");
                     s.render();
-                    // std::thread::sleep(Duration::from_secs(1));
+                    sleep(Duration::new(SLEEPER_TIMEOUT, 0));
                 }
             }
         }
