@@ -18,11 +18,11 @@ fn keyboard_handler(state: &mut RefMut<game_state::State>, event: web_sys::Keybo
     state.change_direction(key);
 }
 
-// fn click_handler(state: &mut RefMut<game_state::State>, _event: web_sys::Event) {
-//     logger::info("click");
-//
-//     state.toggle_game();
-// }
+fn click_handler(state: &mut RefMut<game_state::State>, _event: web_sys::Event) {
+    logger::info("click");
+
+    // state.toggle_game();
+}
 
 fn resize_handler(init_data: &mut RefMut<init::InitData>) {
     let height: u32 = init_data.root.offset_height().try_into().unwrap();
@@ -56,27 +56,29 @@ pub fn register(
         }
     }
 
-    //{
-    //    // Click Events
-    //    let game_state_ref_clone = game_state_ref.clone();
+    {
+        // Click Events
+        let init_data = init_data_ref.borrow();
+        let game_state_ref_clone = game_state_ref.clone();
 
-    //    let onclick_callback = Closure::wrap(Box::new(move |event: web_sys::Event| {
-    //        event.prevent_default();
-    //        let mut game_state = game_state_ref_clone.borrow_mut();
+        let onclick_callback = Closure::wrap(Box::new(move |event: web_sys::Event| {
+            event.prevent_default();
+            let mut game_state = game_state_ref_clone.borrow_mut();
 
-    //        click_handler(&mut game_state, event)
-    //    }) as Box<dyn FnMut(_)>);
+            click_handler(&mut game_state, event)
+        }) as Box<dyn FnMut(_)>);
 
-    //    match init_data
-    //        .canvas
-    //        .add_event_listener_with_callback("click", onclick_callback.as_ref().unchecked_ref())
-    //    {
-    //        Err(e) => logger::error(&format!("Error: {:?}", e)),
-    //        Ok(_) => onclick_callback.forget(),
-    //    }
-    //}
+        match init_data
+            .canvas
+            .add_event_listener_with_callback("click", onclick_callback.as_ref().unchecked_ref())
+        {
+            Err(e) => logger::error(&format!("Error: {:?}", e)),
+            Ok(_) => onclick_callback.forget(),
+        }
+    }
 
     {
+        // Resize Events
         let init_data_ref_clone = init_data_ref.clone();
 
         let resize_callback = Closure::wrap(Box::new(move |_nothing: i64| {
@@ -86,7 +88,7 @@ pub fn register(
         let init_data = init_data_ref.borrow();
 
         match init_data
-            .root
+            .window
             .add_event_listener_with_callback("resize", resize_callback.as_ref().unchecked_ref())
         {
             Err(e) => logger::error(&format!("Error: {:?}", e)),
