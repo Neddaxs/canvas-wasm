@@ -20,7 +20,7 @@ fn request_animation_frame(f: &Closure<dyn FnMut(f64)>) {
         .expect("should register `requestAnimationFrame` OK");
 }
 
-fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_state::State>) {
+pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_state::State>) {
     let ctx = &init_data.ctx;
 
     let tile_width = game_state::tile_size() as f64;
