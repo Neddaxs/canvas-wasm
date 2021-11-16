@@ -3,6 +3,8 @@ use core::result::Result;
 use rand::thread_rng;
 use rand::Rng;
 
+use super::utils::keys::KeyValue;
+
 const GAME_WIDTH: i32 = 32;
 const GAME_SIZE: usize = (GAME_WIDTH * GAME_WIDTH) as usize;
 
@@ -43,7 +45,8 @@ pub enum Tile {
     APPLE,
 }
 
-struct GridTile {
+#[derive(Copy, Clone)]
+pub struct GridTile {
     top: Option<usize>,
     right: Option<usize>,
     bottom: Option<usize>,
@@ -103,8 +106,8 @@ impl State {
         state
     }
 
-    fn move_snake(&mut self) -> Result<(), SnakeDiedError> {
-        let snake_head = self.board[self.snake[0]];
+    pub fn move_snake(&mut self) -> Result<(), SnakeDiedError> {
+        let snake_head = &self.board[self.snake[0]];
         let new_snake_index_option = match self.direction {
             Direction::UP => snake_head.top,
             Direction::RIGHT => snake_head.right,
@@ -113,8 +116,10 @@ impl State {
         };
 
         match new_snake_index_option {
-            Some(new_snake_index) => match self.board.get_mut(new_snake_index) {
-                Some(new_snake_head_tile) => match new_snake_head_tile.state {
+            Some(new_snake_index) => {
+                let mut new_snake_head_tile = self.board[new_snake_index];
+
+                match new_snake_head_tile.state {
                     Tile::APPLE => {
                         self.apples_collected += 1;
                         self.spawn_new_apple();
@@ -130,9 +135,8 @@ impl State {
                     Tile::SNAKE => {
                         return Err(SnakeDiedError::HitSelf);
                     }
-                },
-                None => return Err(SnakeDiedError::OffScreen),
-            },
+                }
+            }
             None => return Err(SnakeDiedError::OffScreen),
         }
 
@@ -146,14 +150,17 @@ impl State {
     }
 
     fn new_non_colliding_index(&self) -> usize {
-        let mut position: usize = 0;
+        let mut position: usize;
 
         loop {
             position = thread_rng().gen_range(32..GAME_SIZE);
 
             match self.board.get(position) {
                 Some(tile) => match tile.state {
-                    Tile::EMPTY => break,
+                    Tile::EMPTY => {
+                        position = tile.index;
+                        break;
+                    }
                     _ => {}
                 },
                 None => {}
@@ -169,6 +176,16 @@ impl State {
 
     pub fn snake(&self) -> &Vec<usize> {
         &self.snake
+    }
+
+    pub fn change_direction(&mut self, direction: KeyValue) {
+        match direction {
+            KeyValue::DownArrow => self.direction = Direction::DOWN,
+            KeyValue::UpArrow => self.direction = Direction::UP,
+            KeyValue::RightArrow => self.direction = Direction::RIGHT,
+            KeyValue::LeftArrow => self.direction = Direction::LEFT,
+            _ => {}
+        }
     }
 }
 
@@ -191,13 +208,15 @@ fn init_board() -> [GridTile; GAME_SIZE] {
         board[i].row = row;
     }
 
-    for (i, grid_tile) in board.iter().enumerate() {
-        let index = i as i32;
+    for tile in board {
+        let index = tile.index as i32;
 
-        board[i].left = safe_get(index - 1, &board).and_then(|tile| Some(tile.index));
-        board[i].right = safe_get(index + 1, &board).and_then(|tile| Some(tile.index));
-        board[i].top = safe_get(index - GAME_WIDTH, &board).and_then(|tile| Some(tile.index));
-        board[i].bottom = safe_get(index + GAME_WIDTH, &board).and_then(|tile| Some(tile.index));
+        board[tile.index].left = safe_get(index - 1, &board).and_then(|tile| Some(tile.index));
+        board[tile.index].right = safe_get(index + 1, &board).and_then(|tile| Some(tile.index));
+        board[tile.index].top =
+            safe_get(index - GAME_WIDTH, &board).and_then(|tile| Some(tile.index));
+        board[tile.index].bottom =
+            safe_get(index + GAME_WIDTH, &board).and_then(|tile| Some(tile.index));
     }
 
     board

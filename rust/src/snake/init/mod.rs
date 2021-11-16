@@ -60,7 +60,7 @@ impl InitData {
             _ => {}
         }
 
-        let init_data = InitData {
+        let mut init_data = InitData {
             window,
             document,
             root,
@@ -74,7 +74,7 @@ impl InitData {
         Ok(init_data)
     }
 
-    fn update_aspect(&self) {
+    fn update_aspect(&mut self) {
         self.aspect = if self.canvas.offset_width() == 0 {
             1
         } else {

@@ -5,12 +5,13 @@ use wasm_bindgen::JsValue;
 use super::{game_state, init};
 
 pub fn render(init_data_ref: &Rc<RefCell<init::InitData>>, state: &game_state::State) {
-    let init_data = init_data_ref.clone().borrow();
+    let init_data = init_data_ref.borrow();
 
     let ctx = &init_data.ctx;
 
     let tile_width = game_state::tile_size() as f64;
-    let tile_size = tile_width * init_data.aspect as f64;
+    // fix this to use proper scaling
+    let tile_size = tile_width * 1 as f64;
 
     for tile in state.board() {
         match tile.state {
