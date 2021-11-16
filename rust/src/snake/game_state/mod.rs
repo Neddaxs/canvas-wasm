@@ -32,6 +32,7 @@ pub enum Direction {
     LEFT,
 }
 
+#[derive(PartialEq)]
 pub enum RunningState {
     IDLE,
     RUNNING,
@@ -79,7 +80,8 @@ pub struct State {
     direction: Direction,
     apples_collected: i32,
     previous_best: i32,
-    running_state: RunningState,
+    pub running_state: RunningState,
+    pub fps: i32,
 }
 
 impl State {
@@ -98,6 +100,7 @@ impl State {
             apples_collected: 0,
             previous_best: previous_best.unwrap_or(0),
             running_state: RunningState::IDLE,
+            fps: 10,
         };
 
         state.spawn_new_apple();

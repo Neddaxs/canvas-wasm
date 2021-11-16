@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, thread::sleep, time::Duration};
+use std::{cell::RefCell, rc::Rc};
 
 mod events;
 mod game_state;
@@ -20,24 +20,7 @@ pub fn run(root_id: &str) {
             let init_data_ref = Rc::new(RefCell::new(init_data));
 
             events::listeners::register(&init_data_ref, &game_state);
-
-            // Renderer
-
-            loop {
-                let mut game = game_state.borrow_mut();
-                match game.move_snake() {
-                    Ok(_) => {
-                        renderer::render(&init_data_ref, &game);
-                        // sleep(Duration::from_secs(1));
-                    }
-                    Err(e) => {
-                        utils::logger::error(&format!("Error: {:?}", e));
-                        break;
-                    }
-                }
-
-                break;
-            }
+            renderer::handle_renders(&init_data_ref, &game_state);
         }
         Err(e) => utils::logger::error(&format!("Error: {:?}", e)),
     }

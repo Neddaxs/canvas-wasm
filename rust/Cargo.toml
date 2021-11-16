@@ -15,6 +15,7 @@ rand = "0.8"
 # We enable it only for web-wasm check
 # See https://docs.rs/getrandom/0.2.1/getrandom/#webassembly-support
 getrandom = { version = "0.2", features = ["js"] }
+libm = "0.2.1"
 
 [dependencies.web-sys]
 version = "0.3.55"
