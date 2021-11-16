@@ -4,10 +4,10 @@ import type { Props } from './CoreLayout.types';
 
 function CoreLayout({ children, headProps = {} }: Props) {
   return (
-    <>
+    <div className="container w-screen h-screen">
       <Head {...headProps} />
-      <div className="container w-screen h-screen">{children}</div>
-    </>
+      {children}
+    </div>
   );
 }
 
