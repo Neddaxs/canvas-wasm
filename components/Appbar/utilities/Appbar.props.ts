@@ -1,4 +1,4 @@
-import type GAME from "../../../types/GAME.enum";
+import type GAME from '../../../types/GAME.enum';
 
 type AppbarProps = {
   currentGame: GAME;

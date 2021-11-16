@@ -1,6 +1,6 @@
-import { memo } from "react";
-import { GAME_VALUES } from "../../types/GAME.enum";
-import type AppbarProps from "./utilities/Appbar.props";
+import { memo } from 'react';
+import { GAME_VALUES } from '../../types/GAME.enum';
+import type AppbarProps from './utilities/Appbar.props';
 
 export default memo(function Appbar({
   currentGame,
@@ -9,10 +9,10 @@ export default memo(function Appbar({
   return (
     <ul
       style={{
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        listStyle: "none",
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        listStyle: 'none',
       }}
     >
       {GAME_VALUES.map(
@@ -25,14 +25,14 @@ export default memo(function Appbar({
               }
             }}
             style={{
-              padding: "1em 1.5em",
+              padding: '1em 1.5em',
               ...(currentGame === game
                 ? {
-                    background: "cyan",
+                    background: 'cyan',
                   }
                 : {
-                    background: "gray",
-                    cursor: "pointer",
+                    background: 'gray',
+                    cursor: 'pointer',
                   }),
             }}
           >

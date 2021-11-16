@@ -1,6 +1,6 @@
 enum GAME {
-  CHESS = "Chess",
-  CHECKERS = "Checkers",
+  CHESS = 'Chess',
+  CHECKERS = 'Checkers',
 }
 
 export default GAME;

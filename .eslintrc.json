@@ -26,7 +26,8 @@
     "prettier/prettier": [
       "error",
       {
-        "endOfLine": "auto"
+        "endOfLine": "auto",
+        "singleQuote": true
       }
     ],
     "react/react-in-jsx-scope": 0,

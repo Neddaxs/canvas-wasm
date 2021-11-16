@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import * as wasmPackage from "rust/pkg";
+import * as wasmPackage from 'rust/pkg';
 
 const useWasm = () => {
   const [state, setState] = useState<typeof wasmPackage>(null);

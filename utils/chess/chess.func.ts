@@ -1,13 +1,13 @@
-import removeChildren from "../dom/removeChildren.func";
+import removeChildren from '../dom/removeChildren.func';
 
-const BACKGROUND_COLOR = "#588A38";
+const BACKGROUND_COLOR = '#588A38';
 
 export default function chess(root: HTMLDivElement): () => void {
   removeChildren(root);
 
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  canvas.style.position = "absolute";
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.style.position = 'absolute';
   root.appendChild(canvas);
 
   const state = {
@@ -23,12 +23,12 @@ export default function chess(root: HTMLDivElement): () => void {
       canvas.width = offsetHeight;
       canvas.height = offsetHeight;
       canvas.style.left = `${(offsetWidth - offsetHeight) / 2}px`;
-      canvas.style.top = "";
+      canvas.style.top = '';
     } else {
       canvas.width = offsetWidth;
       canvas.height = offsetWidth;
       canvas.style.top = `${(offsetHeight - offsetWidth) / 2}px`;
-      canvas.style.left = "";
+      canvas.style.left = '';
     }
 
     state.aspect = canvas.offsetWidth === 0 ? 1 : canvas.offsetWidth / 100;
@@ -45,7 +45,7 @@ export default function chess(root: HTMLDivElement): () => void {
     state.ctx.fillStyle = BACKGROUND_COLOR;
     state.ctx.fillRect(0, 0, ctx.canvas.offsetWidth, ctx.canvas.offsetHeight);
 
-    state.ctx.fillStyle = "black";
+    state.ctx.fillStyle = 'black';
     state.ctx.fillText(
       String(state.clicks),
       5 * state.aspect,
@@ -63,6 +63,6 @@ export default function chess(root: HTMLDivElement): () => void {
   return function cleanup() {
     // cleanup, this will be called on unmount
     removeChildren(root);
-    window.removeEventListener("onresize", window.onresize);
+    window.removeEventListener('onresize', window.onresize);
   };
 }
