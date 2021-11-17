@@ -1,5 +1,3 @@
-use core::fmt;
-use core::result::Result;
 use rand::thread_rng;
 use rand::Rng;
 
@@ -10,23 +8,6 @@ const GAME_HEIGHT: i32 = 32;
 const GAME_SIZE: usize = (GAME_WIDTH * GAME_HEIGHT) as usize;
 
 const BASE_FPS: f64 = 5.0;
-
-#[derive(Debug)]
-pub enum SnakeDiedError {
-    OffScreen,
-    HitSelf,
-}
-
-impl std::error::Error for SnakeDiedError {}
-
-impl fmt::Display for SnakeDiedError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            SnakeDiedError::OffScreen => write!(f, "Snake ran off screen!"),
-            SnakeDiedError::HitSelf => write!(f, "Snake ran into itself!"),
-        }
-    }
-}
 
 #[derive(Debug, PartialEq)]
 pub enum Direction {
@@ -127,7 +108,7 @@ impl State {
         self.spawn_new_apple();
     }
 
-    pub fn move_snake(&mut self) -> Result<(), SnakeDiedError> {
+    pub fn move_snake(&mut self) {
         let snake_head = &self.board[self.snake[0]];
         let new_snake_index_option = match self.direction {
             Direction::UP => snake_head.top,
@@ -170,8 +151,6 @@ impl State {
                 self.running_state = RunningState::DIED;
             }
         }
-
-        Ok(())
     }
 
     pub fn toggle_game(&mut self) {
@@ -220,10 +199,6 @@ impl State {
 
     pub fn board(&self) -> &[GridTile; GAME_SIZE] {
         &self.board
-    }
-
-    pub fn snake(&self) -> &Vec<usize> {
-        &self.snake
     }
 
     pub fn change_direction(&mut self, direction: KeyValue) {

@@ -5,7 +5,7 @@ use std::{
 
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
-use super::{game_state, init, utils::logger};
+use super::{game_state, init};
 
 extern crate libm;
 extern crate web_sys;
@@ -30,13 +30,7 @@ pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_st
 
     match state.running_state {
         game_state::RunningState::RUNNING => {
-            match state.move_snake() {
-                Ok(_) => {}
-                Err(e) => {
-                    logger::error(&format!("Error: {:?}", e));
-                    return;
-                }
-            }
+            state.move_snake();
             let tile_width = game_state::tile_size() as f64;
             // fix this to use proper scaling
             let tile_size = tile_width * 1 as f64;

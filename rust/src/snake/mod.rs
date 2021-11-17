@@ -4,7 +4,6 @@ mod events;
 mod game_state;
 mod init;
 mod renderer;
-mod state;
 mod utils;
 
 extern crate web_sys;
