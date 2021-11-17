@@ -213,4 +213,23 @@ pub fn register(
             Ok(_) => resize_callback.forget(),
         }
     }
+
+    {
+        // Blur Events (User Leaves The Tab)
+        let game_state_ref_clone = game_state_ref.clone();
+
+        let on_blur_callback = Closure::wrap(Box::new(move |_nothing: f64| {
+            game_state_ref_clone.borrow_mut().toggle_game();
+        }) as Box<dyn FnMut(_)>);
+
+        let init_data = init_data_ref.borrow();
+
+        match init_data
+            .window
+            .add_event_listener_with_callback("blur", on_blur_callback.as_ref().unchecked_ref())
+        {
+            Err(e) => logger::error(&format!("Error: {:?}", e)),
+            Ok(_) => on_blur_callback.forget(),
+        }
+    }
 }

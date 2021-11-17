@@ -33,7 +33,7 @@ pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_st
             state.move_snake();
             let tile_width = game_state::tile_size() as f64;
             // fix this to use proper scaling
-            let tile_size = tile_width * 1 as f64;
+            let tile_size = tile_width * 1.0;
 
             for tile in state.board() {
                 match tile.state {
