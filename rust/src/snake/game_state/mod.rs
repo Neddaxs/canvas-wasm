@@ -8,6 +8,8 @@ use super::utils::{keys::KeyValue, logger};
 const GAME_WIDTH: i32 = 32;
 const GAME_SIZE: usize = (GAME_WIDTH * GAME_WIDTH) as usize;
 
+const BASE_FPS: f64 = 5.0;
+
 #[derive(Debug)]
 pub enum SnakeDiedError {
     OffScreen,
@@ -25,7 +27,7 @@ impl fmt::Display for SnakeDiedError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Direction {
     UP,
     RIGHT,
@@ -41,7 +43,7 @@ pub enum RunningState {
     DIED,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Tile {
     SNAKE,
     EMPTY,
@@ -83,7 +85,7 @@ pub struct State {
     apples_collected: i32,
     previous_best: i32,
     pub running_state: RunningState,
-    pub fps: i32,
+    pub fps: f64,
 }
 
 impl State {
@@ -98,7 +100,7 @@ impl State {
             apples_collected: 0,
             previous_best: previous_best.unwrap_or(0),
             running_state: RunningState::IDLE,
-            fps: 7,
+            fps: BASE_FPS,
         };
 
         state.spawn_snake();
@@ -119,6 +121,7 @@ impl State {
         self.apples = vec![];
         self.snake = vec![];
         self.direction = Direction::UP;
+        self.fps = BASE_FPS;
         self.spawn_snake();
         self.spawn_new_apple();
     }
@@ -135,12 +138,22 @@ impl State {
         match new_snake_index_option {
             Some(new_snake_index) => match self.board[new_snake_index].state {
                 Tile::SNAKE => {
-                    self.running_state = RunningState::DIED;
+                    for snake_index in self.snake.iter().cloned() {
+                        if self.board[snake_index].state == Tile::SNAKE {
+                            self.running_state = RunningState::DIED;
+                            break;
+                        }
+                    }
                 }
                 Tile::APPLE => {
                     self.apples_collected += 1;
                     self.spawn_new_apple();
+                    self.snake.insert(0, new_snake_index);
                     self.board[new_snake_index].state = Tile::SNAKE;
+
+                    if self.apples_collected % 3 == 0 {
+                        self.fps += 0.5;
+                    }
                 }
                 Tile::EMPTY => {
                     self.snake.insert(0, new_snake_index);
@@ -151,7 +164,10 @@ impl State {
                     self.board[new_snake_index].state = Tile::SNAKE;
                 }
             },
-            None => return Err(SnakeDiedError::OffScreen),
+            None => {
+                // Went off map
+                self.running_state = RunningState::DIED;
+            }
         }
 
         Ok(())
@@ -211,11 +227,26 @@ impl State {
 
     pub fn change_direction(&mut self, direction: KeyValue) {
         match direction {
-            KeyValue::DownArrow => self.direction = Direction::DOWN,
-            KeyValue::UpArrow => self.direction = Direction::UP,
-            KeyValue::RightArrow => self.direction = Direction::RIGHT,
-            KeyValue::LeftArrow => self.direction = Direction::LEFT,
-
+            KeyValue::DownArrow => {
+                if self.direction != Direction::UP {
+                    self.direction = Direction::DOWN;
+                }
+            }
+            KeyValue::UpArrow => {
+                if self.direction != Direction::DOWN {
+                    self.direction = Direction::UP
+                }
+            }
+            KeyValue::RightArrow => {
+                if self.direction != Direction::LEFT {
+                    self.direction = Direction::RIGHT;
+                }
+            }
+            KeyValue::LeftArrow => {
+                if self.direction != Direction::RIGHT {
+                    self.direction = Direction::LEFT
+                }
+            }
             _ => {}
         }
     }

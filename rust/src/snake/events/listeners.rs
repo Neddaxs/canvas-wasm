@@ -7,7 +7,10 @@ use wasm_bindgen::{prelude::Closure, JsCast};
 use crate::snake::{
     game_state, init,
     renderer::render,
-    utils::{keys, logger},
+    utils::{
+        keys::{get_key, KeyValue},
+        logger,
+    },
 };
 
 extern crate web_sys;
@@ -15,8 +18,16 @@ extern crate web_sys;
 fn keyboard_handler(game: &mut RefMut<game_state::State>, event: web_sys::KeyboardEvent) {
     logger::info("keydown");
 
-    let key = keys::get_key(event.key().as_str());
-    game.change_direction(key);
+    let key = get_key(event.key().as_str());
+    match key {
+        KeyValue::SpaceBar => {
+            game.toggle_game();
+        }
+        KeyValue::DownArrow | KeyValue::LeftArrow | KeyValue::RightArrow | KeyValue::UpArrow => {
+            game.change_direction(key)
+        }
+        _ => {}
+    }
 }
 
 fn click_handler(

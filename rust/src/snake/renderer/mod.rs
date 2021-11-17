@@ -96,7 +96,7 @@ pub fn handle_renders(
         let mut game_data = game_state_ref_clone.borrow_mut();
         let mut init_data = init_data_ref_clone.borrow_mut();
 
-        let delay = 1000.0 / game_data.fps as f64;
+        let delay = 1000.0 / game_data.fps;
 
         match previous_timestamp {
             Some(value) => {
