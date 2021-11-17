@@ -10,6 +10,10 @@ use super::{game_state, init, utils::logger};
 extern crate libm;
 extern crate web_sys;
 
+const GRASS_COLOR: &str = "#348C31";
+const SNAKE_COLOR: &str = "#b6b428";
+const APPLE_COLOR: &str = "#C7372F";
+
 fn window() -> web_sys::Window {
     web_sys::window().expect("no global `window` exists")
 }
@@ -30,13 +34,13 @@ pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_st
     for tile in state.board() {
         match tile.state {
             game_state::Tile::SNAKE => {
-                ctx.set_fill_style(&JsValue::from_str("blue"));
+                ctx.set_fill_style(&JsValue::from_str(SNAKE_COLOR));
             }
             game_state::Tile::EMPTY => {
-                ctx.set_fill_style(&JsValue::from_str("green"));
+                ctx.set_fill_style(&JsValue::from_str(GRASS_COLOR));
             }
             game_state::Tile::APPLE => {
-                ctx.set_fill_style(&JsValue::from_str("red"));
+                ctx.set_fill_style(&JsValue::from_str(APPLE_COLOR));
             }
         }
 
@@ -53,11 +57,11 @@ pub fn handle_renders(
     init_data_ref: &Rc<RefCell<init::InitData>>,
     game_state_ref: &Rc<RefCell<game_state::State>>,
 ) {
-    {}
     let init_data_ref_clone = init_data_ref.clone();
     let game_state_ref_clone = game_state_ref.clone();
 
     let mut previous_timestamp: Option<f64> = None;
+    let mut frame: f64 = -1.0;
     let raf_callback = Rc::new(RefCell::new(None));
 
     let raf_callback_clone = raf_callback.clone();
@@ -66,18 +70,18 @@ pub fn handle_renders(
         let mut game_data = game_state_ref_clone.borrow_mut();
         let mut init_data = init_data_ref_clone.borrow_mut();
 
-        let delay = 1000 / game_data.fps;
-        let frame: f64 = -1.0;
+        let delay = 1000.0 / game_data.fps as f64;
 
         match previous_timestamp {
             Some(value) => {
-                let calculated_frame = libm::floor((timestamp - value) / delay as f64);
+                let calculated_frame = libm::floor((timestamp - value) / delay);
 
                 if calculated_frame > frame {
+                    frame = calculated_frame;
+
                     match game_data.move_snake() {
                         Ok(_) => {
                             render(&mut init_data, &mut game_data);
-                            // sleep(Duration::from_secs(1));
                         }
                         Err(e) => {
                             logger::error(&format!("Error: {:?}", e));

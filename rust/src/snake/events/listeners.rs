@@ -12,11 +12,11 @@ use crate::snake::{
 
 extern crate web_sys;
 
-fn keyboard_handler(state: &mut RefMut<game_state::State>, event: web_sys::KeyboardEvent) {
+fn keyboard_handler(game: &mut RefMut<game_state::State>, event: web_sys::KeyboardEvent) {
     logger::info("keydown");
 
     let key = keys::get_key(event.key().as_str());
-    state.change_direction(key);
+    game.change_direction(key);
 }
 
 fn click_handler(state: &mut RefMut<game_state::State>, _event: web_sys::Event) {
@@ -31,8 +31,6 @@ fn resize_handler(
 ) {
     let height: u32 = init_data.root.offset_height().try_into().unwrap();
     let width: u32 = init_data.root.offset_width().try_into().unwrap();
-
-    logger::info(&format!("height: {}, width: {}", height, width)[..]);
 
     init_data.canvas.set_width(width);
     init_data.canvas.set_height(height);

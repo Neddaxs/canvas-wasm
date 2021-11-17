@@ -3,7 +3,7 @@ use core::result::Result;
 use rand::thread_rng;
 use rand::Rng;
 
-use super::utils::keys::KeyValue;
+use super::utils::{keys::KeyValue, logger};
 
 const GAME_WIDTH: i32 = 32;
 const GAME_SIZE: usize = (GAME_WIDTH * GAME_WIDTH) as usize;
@@ -86,25 +86,21 @@ pub struct State {
 
 impl State {
     pub fn new(previous_best: Option<i32>) -> State {
-        let mut board = init_board();
-
-        let snake_position = thread_rng().gen_range((GAME_WIDTH as usize)..GAME_SIZE);
-
-        board[snake_position].state = Tile::SNAKE;
+        let board = init_board();
 
         let mut state = State {
             board,
-            snake: vec![snake_position],
+            snake: vec![],
             apples: vec![],
             direction: Direction::UP,
             apples_collected: 0,
             previous_best: previous_best.unwrap_or(0),
             running_state: RunningState::IDLE,
-            fps: 10,
+            fps: 7,
         };
 
+        state.spawn_snake();
         state.spawn_new_apple();
-        state.board[state.apples[0]].state = Tile::APPLE;
 
         state
     }
@@ -119,31 +115,34 @@ impl State {
         };
 
         match new_snake_index_option {
-            Some(new_snake_index) => {
-                let mut new_snake_head_tile = self.board[new_snake_index];
-
-                match new_snake_head_tile.state {
-                    Tile::APPLE => {
-                        self.apples_collected += 1;
-                        self.spawn_new_apple();
-                        new_snake_head_tile.state = Tile::SNAKE;
-                    }
-                    Tile::EMPTY => {
-                        new_snake_head_tile.state = Tile::SNAKE;
-                        self.snake.insert(0, new_snake_index);
-
-                        let last = self.snake.pop().unwrap();
-                        self.board[last].state = Tile::EMPTY;
-                    }
-                    Tile::SNAKE => {
-                        return Err(SnakeDiedError::HitSelf);
-                    }
+            Some(new_snake_index) => match self.board[new_snake_index].state {
+                Tile::SNAKE => {
+                    return Err(SnakeDiedError::HitSelf);
                 }
-            }
+                Tile::APPLE => {
+                    self.apples_collected += 1;
+                    self.spawn_new_apple();
+                    self.board[new_snake_index].state = Tile::SNAKE;
+                }
+                Tile::EMPTY => {
+                    self.snake.insert(0, new_snake_index);
+
+                    let last = self.snake.pop().unwrap();
+                    self.board[last].state = Tile::EMPTY;
+
+                    self.board[new_snake_index].state = Tile::SNAKE;
+                }
+            },
             None => return Err(SnakeDiedError::OffScreen),
         }
 
         Ok(())
+    }
+
+    fn spawn_snake(&mut self) {
+        let index = self.new_non_colliding_index();
+        self.snake.push(index);
+        self.board[index as usize].state = Tile::SNAKE;
     }
 
     fn spawn_new_apple(&mut self) {
