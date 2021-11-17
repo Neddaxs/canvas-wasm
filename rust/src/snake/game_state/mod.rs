@@ -64,8 +64,8 @@ pub struct State {
     snake: Vec<usize>,
     apples: Vec<usize>,
     direction: Direction,
-    apples_collected: i32,
-    previous_best: i32,
+    pub apples_collected: i32,
+    pub previous_best: i32,
     pub running_state: RunningState,
     pub fps: f64,
 }
@@ -250,12 +250,24 @@ fn init_board() -> [GridTile; GAME_SIZE] {
     for tile in board {
         let index = tile.index as i32;
 
-        board[tile.index].left = safe_get(index - 1, &board).and_then(|tile| Some(tile.index));
-        board[tile.index].right = safe_get(index + 1, &board).and_then(|tile| Some(tile.index));
+        board[tile.index].left = safe_get(index - 1, &board).and_then(|next_tile| {
+            if next_tile.col < tile.col {
+                Some(next_tile.index)
+            } else {
+                None
+            }
+        });
+        board[tile.index].right = safe_get(index + 1, &board).and_then(|next_tile| {
+            if next_tile.col > tile.col {
+                Some(next_tile.index)
+            } else {
+                None
+            }
+        });
         board[tile.index].top =
-            safe_get(index - GAME_WIDTH, &board).and_then(|tile| Some(tile.index));
+            safe_get(index - GAME_WIDTH, &board).and_then(|next_tile| Some(next_tile.index));
         board[tile.index].bottom =
-            safe_get(index + GAME_WIDTH, &board).and_then(|tile| Some(tile.index));
+            safe_get(index + GAME_WIDTH, &board).and_then(|next_tile| Some(next_tile.index));
     }
 
     board

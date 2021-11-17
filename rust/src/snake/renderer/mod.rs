@@ -55,6 +55,9 @@ pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_st
                     tile_size,
                 );
             }
+
+            ctx.stroke_text(&format!("{:?}", state.apples_collected)[..], 100.0, 100.0)
+                .ok();
         }
         game_state::RunningState::DIED => {
             ctx.stroke_text("DIED", 100.0, 100.0).ok();
