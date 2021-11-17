@@ -14,6 +14,7 @@ pub fn run(root_id: &str) {
 
     match init::InitData::new(root_id) {
         Ok(init_data) => {
+            init_data.canvas.focus().ok();
             utils::logger::info("Successfully initialized data!");
 
             let game_state = Rc::new(RefCell::new(game_state::State::new(None)));
