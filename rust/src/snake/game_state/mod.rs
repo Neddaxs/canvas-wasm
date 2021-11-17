@@ -25,6 +25,7 @@ impl fmt::Display for SnakeDiedError {
     }
 }
 
+#[derive(Debug)]
 pub enum Direction {
     UP,
     RIGHT,
@@ -117,6 +118,7 @@ impl State {
         match new_snake_index_option {
             Some(new_snake_index) => match self.board[new_snake_index].state {
                 Tile::SNAKE => {
+                    self.running_state = RunningState::IDLE;
                     return Err(SnakeDiedError::HitSelf);
                 }
                 Tile::APPLE => {
@@ -137,6 +139,13 @@ impl State {
         }
 
         Ok(())
+    }
+
+    pub fn toggle_game(&mut self) {
+        match self.running_state {
+            RunningState::IDLE | RunningState::PAUSED => self.running_state = RunningState::RUNNING,
+            RunningState::RUNNING => self.running_state = RunningState::PAUSED,
+        }
     }
 
     fn spawn_snake(&mut self) {
@@ -186,6 +195,7 @@ impl State {
             KeyValue::UpArrow => self.direction = Direction::UP,
             KeyValue::RightArrow => self.direction = Direction::RIGHT,
             KeyValue::LeftArrow => self.direction = Direction::LEFT,
+
             _ => {}
         }
     }

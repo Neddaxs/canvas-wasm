@@ -19,10 +19,15 @@ fn keyboard_handler(game: &mut RefMut<game_state::State>, event: web_sys::Keyboa
     game.change_direction(key);
 }
 
-fn click_handler(state: &mut RefMut<game_state::State>, _event: web_sys::Event) {
+fn click_handler(
+    init_data: &mut RefMut<init::InitData>,
+    game: &mut RefMut<game_state::State>,
+    _event: web_sys::Event,
+) {
     logger::info("click");
 
-    // state.toggle_game();
+    game.toggle_game();
+    render(init_data, game);
 }
 
 fn resize_handler(
@@ -64,15 +69,18 @@ pub fn register(
 
     {
         // Click Events
-        let init_data = init_data_ref.borrow();
+        let init_data_ref_clone = init_data_ref.clone();
         let game_state_ref_clone = game_state_ref.clone();
 
         let onclick_callback = Closure::wrap(Box::new(move |event: web_sys::Event| {
             event.prevent_default();
+            let mut init_data = init_data_ref_clone.borrow_mut();
             let mut game_state = game_state_ref_clone.borrow_mut();
 
-            click_handler(&mut game_state, event)
+            click_handler(&mut init_data, &mut game_state, event)
         }) as Box<dyn FnMut(_)>);
+
+        let init_data = init_data_ref.borrow();
 
         match init_data
             .canvas

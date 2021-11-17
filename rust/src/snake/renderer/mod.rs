@@ -60,6 +60,11 @@ pub fn handle_renders(
     let init_data_ref_clone = init_data_ref.clone();
     let game_state_ref_clone = game_state_ref.clone();
 
+    render(
+        &mut init_data_ref.borrow_mut(),
+        &mut game_state_ref.borrow_mut(),
+    );
+
     let mut previous_timestamp: Option<f64> = None;
     let mut frame: f64 = -1.0;
     let raf_callback = Rc::new(RefCell::new(None));
@@ -72,26 +77,28 @@ pub fn handle_renders(
 
         let delay = 1000.0 / game_data.fps as f64;
 
-        match previous_timestamp {
-            Some(value) => {
-                let calculated_frame = libm::floor((timestamp - value) / delay);
+        if game_data.running_state == game_state::RunningState::RUNNING {
+            match previous_timestamp {
+                Some(value) => {
+                    let calculated_frame = libm::floor((timestamp - value) / delay);
 
-                if calculated_frame > frame {
-                    frame = calculated_frame;
+                    if calculated_frame > frame {
+                        frame = calculated_frame;
 
-                    match game_data.move_snake() {
-                        Ok(_) => {
-                            render(&mut init_data, &mut game_data);
-                        }
-                        Err(e) => {
-                            logger::error(&format!("Error: {:?}", e));
-                            return;
+                        match game_data.move_snake() {
+                            Ok(_) => {
+                                render(&mut init_data, &mut game_data);
+                            }
+                            Err(e) => {
+                                logger::error(&format!("Error: {:?}", e));
+                                return;
+                            }
                         }
                     }
                 }
-            }
-            _ => {
-                previous_timestamp = Some(timestamp);
+                _ => {
+                    previous_timestamp = Some(timestamp);
+                }
             }
         }
 
