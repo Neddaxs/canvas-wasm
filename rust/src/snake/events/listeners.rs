@@ -33,6 +33,7 @@ fn click_handler(
     game: &mut RefMut<game_state::State>,
     _event: web_sys::Event,
 ) {
+    init_data.canvas.focus().ok();
     match game.running_state {
         game_state::RunningState::RUNNING => {}
         _ => {
