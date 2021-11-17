@@ -3,10 +3,11 @@ use core::result::Result;
 use rand::thread_rng;
 use rand::Rng;
 
-use super::utils::{keys::KeyValue, logger};
+use super::utils::keys::KeyValue;
 
 const GAME_WIDTH: i32 = 32;
-const GAME_SIZE: usize = (GAME_WIDTH * GAME_WIDTH) as usize;
+const GAME_HEIGHT: i32 = 32;
+const GAME_SIZE: usize = (GAME_WIDTH * GAME_HEIGHT) as usize;
 
 const BASE_FPS: f64 = 5.0;
 
