@@ -2,6 +2,11 @@ mod error;
 
 use wasm_bindgen::JsCast;
 
+pub struct Location {
+    pub x: i32,
+    pub y: i32,
+}
+
 pub struct InitData {
     pub window: web_sys::Window,
     pub document: web_sys::Document,
@@ -9,6 +14,7 @@ pub struct InitData {
     pub canvas: web_sys::HtmlCanvasElement,
     pub ctx: web_sys::CanvasRenderingContext2d,
     pub aspect: i32,
+    pub location: Option<Location>,
 }
 
 impl InitData {
@@ -67,6 +73,7 @@ impl InitData {
             canvas,
             ctx,
             aspect: 0,
+            location: None,
         };
 
         init_data.update_aspect();
@@ -80,5 +87,13 @@ impl InitData {
         } else {
             self.canvas.offset_width() / 100
         }
+    }
+
+    pub fn mouse_down(&mut self, x: i32, y: i32) {
+        self.location = Some(Location { x, y });
+    }
+
+    pub fn mouse_up(&mut self) {
+        self.location = None;
     }
 }

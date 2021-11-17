@@ -27,5 +27,6 @@ features = [
   'HtmlDivElement',
   'Window',
   'Node',
-  'KeyboardEvent'
+  'KeyboardEvent',
+  'MouseEvent',
 ]

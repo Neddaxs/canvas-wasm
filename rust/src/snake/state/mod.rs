@@ -36,40 +36,7 @@ impl State {
         }
     }
 
-    pub fn render(&mut self) {
-        match self.requires_rerender {
-            true => {
-                let ctx = self.ctx.as_mut();
-                ctx.set_fill_style(&JsValue::from_str("red"));
-                // Width is constantly 1, height changes based on amount eaten.
-                ctx.fill_rect(self.location.x, self.location.y, 1.0, self.size);
-            }
-            false => {}
-        }
-    }
-
-    pub fn toggle_game(&mut self) {
-        self.active = !self.active;
-    }
-
-    pub fn change_direction(&mut self, key: KeyValue) {
-        let direction = match key {
-            KeyValue::DownArrow => Some(Directions::Down),
-            KeyValue::LeftArrow => Some(Directions::Left),
-            KeyValue::RightArrow => Some(Directions::Right),
-            KeyValue::UpArrow => Some(Directions::Up),
-            _ => None,
-        };
-        match direction {
-            Some(val) => {
-                self.direction = val;
-                self.made_changes();
-            }
-            None => {}
-        }
-    }
-
-    fn made_changes(&mut self) {
-        self.requires_rerender = true;
+    fn set_location(&mut self, x: f64, y: f64) {
+        self.location = Location { x, y };
     }
 }

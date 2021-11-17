@@ -16,8 +16,6 @@ use crate::snake::{
 extern crate web_sys;
 
 fn keyboard_handler(game: &mut RefMut<game_state::State>, event: web_sys::KeyboardEvent) {
-    logger::info("keydown");
-
     let key = get_key(event.key().as_str());
     match key {
         KeyValue::SpaceBar => {
@@ -35,10 +33,13 @@ fn click_handler(
     game: &mut RefMut<game_state::State>,
     _event: web_sys::Event,
 ) {
-    logger::info("click");
-
-    game.toggle_game();
-    render(init_data, game);
+    match game.running_state {
+        game_state::RunningState::RUNNING => {}
+        _ => {
+            game.toggle_game();
+            render(init_data, game);
+        }
+    }
 }
 
 fn resize_handler(
@@ -54,6 +55,48 @@ fn resize_handler(
     render(init_data, game_data);
 }
 
+fn mouse_down_handler(init_data: &mut RefMut<init::InitData>, event: web_sys::MouseEvent) {
+    let x = event.client_x();
+    let y = event.client_y();
+
+    init_data.mouse_down(x, y);
+}
+
+fn mouse_up_handler(
+    init_data: &mut RefMut<init::InitData>,
+    game_data: &mut RefMut<game_state::State>,
+    event: web_sys::MouseEvent,
+) {
+    let x = event.client_x();
+    let y = event.client_y();
+
+    let (start_x, start_y) = match &init_data.location {
+        Some(val) => (val.x, val.y),
+        _ => (x, y),
+    };
+
+    init_data.mouse_up();
+
+    if x == start_x && y == start_y {
+        return;
+    }
+
+    let x_diff = x - start_x;
+    let y_diff = y - start_y;
+
+    let direction = if x_diff > y_diff && x_diff > 0 {
+        KeyValue::RightArrow
+    } else if x_diff > y_diff {
+        KeyValue::LeftArrow
+    } else if y_diff > 0 {
+        KeyValue::DownArrow
+    } else {
+        KeyValue::UpArrow
+    };
+
+    game_data.change_direction(direction);
+}
+
 pub fn register(
     init_data_ref: &Rc<RefCell<init::InitData>>,
     game_state_ref: &Rc<RefCell<game_state::State>>,
@@ -64,9 +107,8 @@ pub fn register(
         let game_state_ref_clone = game_state_ref.clone();
         let keydown_callback = Closure::wrap(Box::new(move |event: web_sys::KeyboardEvent| {
             event.prevent_default();
-            let mut game_state = game_state_ref_clone.borrow_mut();
 
-            keyboard_handler(&mut game_state, event)
+            keyboard_handler(&mut game_state_ref_clone.borrow_mut(), event)
         }) as Box<dyn FnMut(_)>);
 
         match init_data
@@ -85,10 +127,12 @@ pub fn register(
 
         let onclick_callback = Closure::wrap(Box::new(move |event: web_sys::Event| {
             event.prevent_default();
-            let mut init_data = init_data_ref_clone.borrow_mut();
-            let mut game_state = game_state_ref_clone.borrow_mut();
 
-            click_handler(&mut init_data, &mut game_state, event)
+            click_handler(
+                &mut init_data_ref_clone.borrow_mut(),
+                &mut game_state_ref_clone.borrow_mut(),
+                event,
+            )
         }) as Box<dyn FnMut(_)>);
 
         let init_data = init_data_ref.borrow();
@@ -99,6 +143,51 @@ pub fn register(
         {
             Err(e) => logger::error(&format!("Error: {:?}", e)),
             Ok(_) => onclick_callback.forget(),
+        }
+    }
+
+    {
+        // Mouse Down Events
+        let init_data_ref_clone = init_data_ref.clone();
+        let mouse_down_callback = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+            event.prevent_default();
+
+            mouse_down_handler(&mut init_data_ref_clone.borrow_mut(), event)
+        }) as Box<dyn FnMut(_)>);
+
+        let init_data = init_data_ref.borrow();
+
+        match init_data.canvas.add_event_listener_with_callback(
+            "mousedown",
+            mouse_down_callback.as_ref().unchecked_ref(),
+        ) {
+            Err(e) => logger::error(&format!("Error: {:?}", e)),
+            Ok(_) => mouse_down_callback.forget(),
+        }
+    }
+
+    {
+        // Mouse Up Events
+        let init_data_ref_clone = init_data_ref.clone();
+        let game_state_ref_clone = game_state_ref.clone();
+        let mouse_up_callback = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+            event.prevent_default();
+
+            mouse_up_handler(
+                &mut init_data_ref_clone.borrow_mut(),
+                &mut game_state_ref_clone.borrow_mut(),
+                event,
+            )
+        }) as Box<dyn FnMut(_)>);
+
+        let init_data = init_data_ref.borrow();
+
+        match init_data
+            .canvas
+            .add_event_listener_with_callback("mouseup", mouse_up_callback.as_ref().unchecked_ref())
+        {
+            Err(e) => logger::error(&format!("Error: {:?}", e)),
+            Ok(_) => mouse_up_callback.forget(),
         }
     }
 
