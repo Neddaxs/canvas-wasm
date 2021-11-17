@@ -219,7 +219,10 @@ pub fn register(
         let game_state_ref_clone = game_state_ref.clone();
 
         let on_blur_callback = Closure::wrap(Box::new(move |_nothing: f64| {
-            game_state_ref_clone.borrow_mut().toggle_game();
+            let mut game_state = game_state_ref_clone.borrow_mut();
+            if game_state.running_state == game_state::RunningState::RUNNING {
+                game_state.toggle_game();
+            }
         }) as Box<dyn FnMut(_)>);
 
         let init_data = init_data_ref.borrow();
