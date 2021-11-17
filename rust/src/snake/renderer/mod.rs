@@ -26,30 +26,51 @@ fn request_animation_frame(f: &Closure<dyn FnMut(f64)>) {
 
 pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_state::State>) {
     let ctx = &init_data.ctx;
+    ctx.set_font("30px Arial");
 
-    let tile_width = game_state::tile_size() as f64;
-    // fix this to use proper scaling
-    let tile_size = tile_width * 1 as f64;
+    match state.running_state {
+        game_state::RunningState::RUNNING => {
+            match state.move_snake() {
+                Ok(_) => {}
+                Err(e) => {
+                    logger::error(&format!("Error: {:?}", e));
+                    return;
+                }
+            }
+            let tile_width = game_state::tile_size() as f64;
+            // fix this to use proper scaling
+            let tile_size = tile_width * 1 as f64;
 
-    for tile in state.board() {
-        match tile.state {
-            game_state::Tile::SNAKE => {
-                ctx.set_fill_style(&JsValue::from_str(SNAKE_COLOR));
-            }
-            game_state::Tile::EMPTY => {
-                ctx.set_fill_style(&JsValue::from_str(GRASS_COLOR));
-            }
-            game_state::Tile::APPLE => {
-                ctx.set_fill_style(&JsValue::from_str(APPLE_COLOR));
+            for tile in state.board() {
+                match tile.state {
+                    game_state::Tile::SNAKE => {
+                        ctx.set_fill_style(&JsValue::from_str(SNAKE_COLOR));
+                    }
+                    game_state::Tile::EMPTY => {
+                        ctx.set_fill_style(&JsValue::from_str(GRASS_COLOR));
+                    }
+                    game_state::Tile::APPLE => {
+                        ctx.set_fill_style(&JsValue::from_str(APPLE_COLOR));
+                    }
+                }
+
+                ctx.fill_rect(
+                    (tile.col as f64) * tile_size,
+                    (tile.row as f64) * tile_size,
+                    tile_size,
+                    tile_size,
+                );
             }
         }
-
-        ctx.fill_rect(
-            (tile.col as f64) * tile_size,
-            (tile.row as f64) * tile_size,
-            tile_size,
-            tile_size,
-        );
+        game_state::RunningState::DIED => {
+            ctx.stroke_text("DIED", 100.0, 100.0).ok();
+        }
+        game_state::RunningState::IDLE => {
+            ctx.stroke_text("IDLE", 100.0, 100.0).ok();
+        }
+        game_state::RunningState::PAUSED => {
+            ctx.stroke_text("PAUSED", 100.0, 100.0).ok();
+        }
     }
 }
 
@@ -77,28 +98,17 @@ pub fn handle_renders(
 
         let delay = 1000.0 / game_data.fps as f64;
 
-        if game_data.running_state == game_state::RunningState::RUNNING {
-            match previous_timestamp {
-                Some(value) => {
-                    let calculated_frame = libm::floor((timestamp - value) / delay);
+        match previous_timestamp {
+            Some(value) => {
+                let calculated_frame = libm::floor((timestamp - value) / delay);
 
-                    if calculated_frame > frame {
-                        frame = calculated_frame;
-
-                        match game_data.move_snake() {
-                            Ok(_) => {
-                                render(&mut init_data, &mut game_data);
-                            }
-                            Err(e) => {
-                                logger::error(&format!("Error: {:?}", e));
-                                return;
-                            }
-                        }
-                    }
+                if calculated_frame > frame {
+                    frame = calculated_frame;
+                    render(&mut init_data, &mut game_data);
                 }
-                _ => {
-                    previous_timestamp = Some(timestamp);
-                }
+            }
+            _ => {
+                previous_timestamp = Some(timestamp);
             }
         }
 

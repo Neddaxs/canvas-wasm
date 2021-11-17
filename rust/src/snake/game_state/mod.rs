@@ -38,6 +38,7 @@ pub enum RunningState {
     IDLE,
     RUNNING,
     PAUSED,
+    DIED,
 }
 
 #[derive(Copy, Clone)]
@@ -106,6 +107,22 @@ impl State {
         state
     }
 
+    fn reset(&mut self) {
+        let high_score = if self.previous_best > self.apples_collected {
+            self.previous_best
+        } else {
+            self.apples_collected
+        };
+        self.apples_collected = 0;
+        self.previous_best = high_score;
+        self.board = init_board();
+        self.apples = vec![];
+        self.snake = vec![];
+        self.direction = Direction::UP;
+        self.spawn_snake();
+        self.spawn_new_apple();
+    }
+
     pub fn move_snake(&mut self) -> Result<(), SnakeDiedError> {
         let snake_head = &self.board[self.snake[0]];
         let new_snake_index_option = match self.direction {
@@ -118,8 +135,7 @@ impl State {
         match new_snake_index_option {
             Some(new_snake_index) => match self.board[new_snake_index].state {
                 Tile::SNAKE => {
-                    self.running_state = RunningState::IDLE;
-                    return Err(SnakeDiedError::HitSelf);
+                    self.running_state = RunningState::DIED;
                 }
                 Tile::APPLE => {
                     self.apples_collected += 1;
@@ -145,6 +161,10 @@ impl State {
         match self.running_state {
             RunningState::IDLE | RunningState::PAUSED => self.running_state = RunningState::RUNNING,
             RunningState::RUNNING => self.running_state = RunningState::PAUSED,
+            RunningState::DIED => {
+                self.reset();
+                self.running_state = RunningState::RUNNING;
+            }
         }
     }
 
