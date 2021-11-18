@@ -11,7 +11,7 @@ extern crate libm;
 extern crate web_sys;
 
 const GRASS_COLOR: &str = "#348C31";
-const SNAKE_COLOR: &str = "#b6b428";
+const SNAKE_COLOR: &str = "#1088c9";
 const APPLE_COLOR: &str = "#C7372F";
 
 fn window() -> web_sys::Window {
@@ -28,12 +28,18 @@ pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_st
     let ctx = &init_data.ctx;
     ctx.set_font("30px Arial");
 
+    ctx.set_fill_style(&JsValue::from_str(GRASS_COLOR));
+    ctx.fill_rect(
+        0.0,
+        0.0,
+        (init_data.canvas.offset_width() as u32).into(),
+        (init_data.canvas.offset_height() as u32).into(),
+    );
+
     match state.running_state {
         game_state::RunningState::RUNNING => {
             state.move_snake();
-            let tile_width = game_state::tile_size() as f64;
-            // fix this to use proper scaling
-            let tile_size = tile_width * 1.0;
+            let tile_size = game_state::tile_size(init_data.aspect);
 
             for tile in state.board() {
                 match tile.state {
@@ -56,8 +62,12 @@ pub fn render(init_data: &mut RefMut<init::InitData>, state: &mut RefMut<game_st
                 );
             }
 
-            ctx.stroke_text(&format!("{:?}", state.apples_collected)[..], 100.0, 100.0)
-                .ok();
+            ctx.stroke_text(
+                &format!("{:?}", state.apples_collected)[..],
+                3.0 * init_data.aspect,
+                5.0 * init_data.aspect,
+            )
+            .ok();
         }
         game_state::RunningState::DIED => {
             ctx.stroke_text("DIED", 100.0, 100.0).ok();

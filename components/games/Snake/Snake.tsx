@@ -11,16 +11,8 @@ function Snake() {
   }, [wasm]);
 
   return (
-    <div className="h-full w-full">
-      <div
-        id="snake-canvas-parent"
-        style={{
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-          border: '1px solid black',
-        }}
-      />
+    <div className="flex-1 mx-4 my-8 flex">
+      <div id="snake-canvas-parent" className="flex-1 relative" />
     </div>
   );
 }

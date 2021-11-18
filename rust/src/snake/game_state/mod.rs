@@ -281,6 +281,6 @@ fn safe_get<T>(index: i32, slice: &[T]) -> Option<&T> {
     None
 }
 
-pub fn tile_size() -> i32 {
-    return (GAME_SIZE as i32) / GAME_WIDTH;
+pub fn tile_size(aspect: f64) -> f64 {
+    (100.0 / GAME_WIDTH as f64) * aspect
 }

@@ -8,6 +8,7 @@ use crate::snake::{
     game_state, init,
     renderer::render,
     utils::{
+        self,
         keys::{get_key, KeyValue},
         logger,
     },
@@ -33,7 +34,6 @@ fn click_handler(
     game: &mut RefMut<game_state::State>,
     _event: web_sys::Event,
 ) {
-    init_data.canvas.focus().ok();
     match game.running_state {
         game_state::RunningState::RUNNING => {}
         _ => {
@@ -43,17 +43,11 @@ fn click_handler(
     }
 }
 
-fn resize_handler(
-    init_data: &mut RefMut<init::InitData>,
-    game_data: &mut RefMut<game_state::State>,
-) {
-    let height: u32 = init_data.root.offset_height().try_into().unwrap();
-    let width: u32 = init_data.root.offset_width().try_into().unwrap();
-
-    init_data.canvas.set_width(width);
-    init_data.canvas.set_height(height);
-
-    render(init_data, game_data);
+fn resize_handler(init_data: &mut RefMut<init::InitData>) {
+    match init_data.resize_canvas() {
+        Err(e) => utils::logger::error(&format!("Failed to resize: {:?}", e)),
+        _ => {}
+    };
 }
 
 fn mouse_down_handler(init_data: &mut RefMut<init::InitData>, event: web_sys::MouseEvent) {
@@ -113,7 +107,7 @@ pub fn register(
         }) as Box<dyn FnMut(_)>);
 
         match init_data
-            .canvas
+            .window
             .add_event_listener_with_callback("keydown", keydown_callback.as_ref().unchecked_ref())
         {
             Err(e) => logger::error(&format!("Error: {:?}", e)),
@@ -195,13 +189,9 @@ pub fn register(
     {
         // Resize Events
         let init_data_ref_clone = init_data_ref.clone();
-        let game_state_ref_clone = game_state_ref.clone();
 
         let resize_callback = Closure::wrap(Box::new(move |_nothing: f64| {
-            resize_handler(
-                &mut init_data_ref_clone.borrow_mut(),
-                &mut game_state_ref_clone.borrow_mut(),
-            )
+            resize_handler(&mut init_data_ref_clone.borrow_mut())
         }) as Box<dyn FnMut(_)>);
 
         let init_data = init_data_ref.borrow();

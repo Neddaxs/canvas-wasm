@@ -1,6 +1,6 @@
 mod error;
 
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue};
 
 pub struct Location {
     pub x: i32,
@@ -13,7 +13,7 @@ pub struct InitData {
     pub root: web_sys::HtmlDivElement,
     pub canvas: web_sys::HtmlCanvasElement,
     pub ctx: web_sys::CanvasRenderingContext2d,
-    pub aspect: i32,
+    pub aspect: f64,
     pub location: Option<Location>,
 }
 
@@ -43,10 +43,6 @@ impl InitData {
             Err(_) => return Err(error::InitError::CreateCanvasError),
         };
 
-        canvas.set_width(root.offset_width().try_into().unwrap());
-        canvas.set_height(root.offset_height().try_into().unwrap());
-        canvas.set_tab_index(1);
-
         let ctx = match canvas
             .get_context("2d")
             .unwrap()
@@ -72,20 +68,51 @@ impl InitData {
             root,
             canvas,
             ctx,
-            aspect: 0,
+            aspect: 0.0,
             location: None,
         };
 
-        init_data.update_aspect();
+        match init_data.resize_canvas() {
+            Ok(_) => return Ok(init_data),
+            Err(_) => return Err(error::InitError::ScaleCanvasError),
+        };
+    }
 
-        Ok(init_data)
+    pub fn resize_canvas(&mut self) -> Result<(), JsValue> {
+        let width: u32 = self.root.offset_width().try_into().unwrap();
+        let height: u32 = self.root.offset_height().try_into().unwrap();
+
+        let size = if width > height {
+            let offset = (width - height) / 2;
+            self.canvas
+                .set_attribute(
+                    "style",
+                    &create_canvas_style(&format!("{}px", offset), "0px"),
+                )
+                .unwrap();
+            height
+        } else {
+            let offset = (height - width) / 2;
+            self.canvas
+                .set_attribute(
+                    "style",
+                    &create_canvas_style("0px", &format!("{}px", offset)),
+                )
+                .unwrap();
+            width
+        };
+
+        self.canvas.set_width(size);
+        self.canvas.set_height(size);
+        self.update_aspect();
+        Ok(())
     }
 
     fn update_aspect(&mut self) {
-        self.aspect = if self.canvas.offset_width() == 0 {
-            1
+        self.aspect = if self.canvas.offset_width() < 1 {
+            1.0
         } else {
-            self.canvas.offset_width() / 100
+            (self.canvas.offset_width() as f64) / 100.0
         }
     }
 
@@ -96,4 +123,8 @@ impl InitData {
     pub fn mouse_up(&mut self) {
         self.location = None;
     }
+}
+
+fn create_canvas_style(left: &str, top: &str) -> String {
+    format!("position: absolute; left: {}; top: {};", left, top)
 }

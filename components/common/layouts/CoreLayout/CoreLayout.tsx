@@ -6,7 +6,7 @@ import type { Props } from './CoreLayout.types';
 
 function CoreLayout({ children, headProps = {} }: Props) {
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-screen overflow-hidden flex flex-col">
       <Head {...headProps} />
       <AppBar />
       {children}

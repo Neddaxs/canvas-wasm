@@ -8,6 +8,7 @@ pub enum InitError {
     CreateCanvasError,
     AppendCanvasError,
     GetContextError,
+    ScaleCanvasError,
 }
 
 impl std::error::Error for InitError {}
@@ -24,6 +25,9 @@ impl fmt::Display for InitError {
             }
             InitError::GetContextError => {
                 write!(f, "Failed to get the context for the canvas (2d)")
+            }
+            InitError::ScaleCanvasError => {
+                write!(f, "Failed to scale the canvas to its maximum size")
             }
         }
     }
