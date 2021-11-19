@@ -3,4 +3,5 @@ export enum USER_ROUTES {
   CHECKERS = '/checkers',
   CHESS = '/chess',
   HOME = '/',
+  TANNER = '/tanner',
 }

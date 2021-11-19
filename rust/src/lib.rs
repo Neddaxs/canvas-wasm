@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::*;
 mod snake;
+pub mod tanner;
 
 #[wasm_bindgen]
 pub fn add(num1: i32, num2: i32) -> i32 {
