@@ -9,11 +9,13 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
+console_error_panic_hook = "0.1.5"
+js-sys = "0.3.19"
+lazy_static = "1.3.0"
+nalgebra = "0.18.0"
 wasm-bindgen = "0.2.78"
 gloo-events = "0.1.1"
 rand = "0.8"
-# We enable it only for web-wasm check
-# See https://docs.rs/getrandom/0.2.1/getrandom/#webassembly-support
 getrandom = { version = "0.2", features = ["js"] }
 libm = "0.2.1"
 
@@ -21,12 +23,19 @@ libm = "0.2.1"
 version = "0.3.55"
 features = [
   'CanvasRenderingContext2d',
-  'Document',
-  'Element',
-  'HtmlCanvasElement',
-  'HtmlDivElement',
-  'Window',
   'Node',
   'KeyboardEvent',
   'MouseEvent',
+  'HtmlDivElement',
+  'Window',
+  'Document',
+  'Element',
+  'EventTarget',
+  'HtmlCanvasElement',
+  'MouseEvent',
+  'WebGlBuffer',
+  'WebGlProgram',
+  'WebGlRenderingContext',
+  'WebGlShader',
+  'WebGlUniformLocation',
 ]
