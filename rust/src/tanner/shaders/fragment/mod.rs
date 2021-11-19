@@ -1,1 +1,1 @@
-pub mod color_2d;
+pub const COLOR_2D: &'static str = include_str!("COLOR_2D.frag");

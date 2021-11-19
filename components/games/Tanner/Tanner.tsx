@@ -47,14 +47,12 @@ function Snake() {
       }
 
       render();
-
-      wasm.snake('tanner-canvas-parent');
     }
   }, [wasm, canvasRef]);
 
   return (
     <div className="flex-1 mx-4 my-8 flex">
-      <div id="tanner-canvas-parent" className="flex-1 relative">
+      <div className="flex-1 relative">
         <canvas id="tannerCanvas" ref={canvasRef} />
       </div>
     </div>

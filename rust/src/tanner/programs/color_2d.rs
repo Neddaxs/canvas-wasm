@@ -2,7 +2,7 @@ use super::super::shaders::{fragment, vertex};
 use super::super::utils;
 use js_sys::WebAssembly;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::WebGlRenderingContext as GL;
+use web_sys::WebGl2RenderingContext as GL;
 use web_sys::*;
 
 pub struct Color2D {
@@ -15,9 +15,8 @@ pub struct Color2D {
 }
 
 impl Color2D {
-    pub fn new(gl: &WebGlRenderingContext) -> Self {
-        let program =
-            utils::link_program(&gl, vertex::color_2d::SHADER, fragment::color_2d::SHADER).unwrap();
+    pub fn new(gl: &WebGl2RenderingContext) -> Self {
+        let program = utils::link_program(&gl, vertex::COLOR_2D, fragment::COLOR_2D).unwrap();
 
         // x, y
         let vertices: [f32; 12] = [0., 1., 0., 0., 1., 1., 1., 1., 0., 0., 1., 0.];
@@ -48,7 +47,7 @@ impl Color2D {
 
     pub fn render(
         &self,
-        gl: &WebGlRenderingContext,
+        gl: &WebGl2RenderingContext,
         bottom: f32,
         top: f32,
         left: f32,

@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
-use web_sys::WebGlRenderingContext as GL;
+use web_sys::WebGl2RenderingContext as GL;
 use web_sys::*;
 
 mod gl_setup;
@@ -18,7 +18,7 @@ extern "C" {
 
 #[wasm_bindgen]
 pub struct TannerClient {
-    gl: WebGlRenderingContext,
+    gl: WebGl2RenderingContext,
     program_color_2d: programs::Color2D,
 }
 

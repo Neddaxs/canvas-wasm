@@ -1,19 +1,19 @@
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::WebGlRenderingContext as GL;
+use web_sys::WebGl2RenderingContext as GL;
 use web_sys::*;
 
-pub fn initialize_web_gl_context() -> Result<WebGlRenderingContext, JsValue> {
+pub fn initialize_web_gl_context() -> Result<WebGl2RenderingContext, JsValue> {
     let window = window().unwrap();
     let document = window.document().unwrap();
 
-    let canvas = document.get_element_by_id("rustCanvas").unwrap();
+    let canvas = document.get_element_by_id("tannerCanvas").unwrap();
     let canvas: HtmlCanvasElement = canvas.dyn_into::<HtmlCanvasElement>().unwrap();
 
-    let gl: WebGlRenderingContext = canvas
-        .get_context("webgl")
+    let gl: WebGl2RenderingContext = canvas
+        .get_context("webgl2")
         .unwrap()
         .unwrap()
-        .dyn_into::<WebGlRenderingContext>()
+        .dyn_into::<WebGl2RenderingContext>()
         .unwrap();
 
     gl.enable(GL::BLEND);
