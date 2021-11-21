@@ -1,5 +1,14 @@
+use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::WebGl2RenderingContext as GL;
 use web_sys::*;
+
+extern crate wasm_bindgen;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    pub fn log(s: &str);
+}
 
 pub fn link_program(
     gl: &WebGl2RenderingContext,

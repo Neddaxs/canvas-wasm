@@ -1,6 +1,8 @@
 import { memo, useEffect, useRef } from 'react';
 import useWasm from 'hooks/useWasm';
 
+import { triangleProgram, renderProgram } from './Tanner.utils';
+
 const FPS_THROTTLE = 1000.0 / 60.0; // milliseconds / frames;
 
 function Snake() {
@@ -16,13 +18,8 @@ function Snake() {
         return;
       }
 
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-      const client = wasm.TannerClient.new();
-      const initialTime = Date.now();
-
       let lastDrawTime = -1; // In Milliseconds
+      const program = triangleProgram(gl);
 
       function render() {
         window.requestAnimationFrame(render);
@@ -40,9 +37,7 @@ function Snake() {
             gl.viewport(0, 0, window.innerWidth, window.innerHeight);
           }
 
-          const elapsedTime = currTime - initialTime;
-          client.update(elapsedTime, window.innerHeight, window.innerWidth);
-          client.render();
+          renderProgram(gl, program);
         }
       }
 
