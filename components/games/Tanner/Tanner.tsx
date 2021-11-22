@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef } from 'react';
 import useWasm from 'hooks/useWasm';
 
-import { triangleProgram, renderProgram } from './Tanner.utils';
+import CubeProgram from './programs/cube';
 
 const FPS_THROTTLE = 1000.0 / 60.0; // milliseconds / frames;
 
@@ -18,8 +18,14 @@ function Snake() {
         return;
       }
 
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+      gl.frontFace(gl.CCW);
+      gl.cullFace(gl.BACK);
+
       let lastDrawTime = -1; // In Milliseconds
-      const program = triangleProgram(gl);
+      const program = new CubeProgram(gl, canvas.width / canvas.height);
+      let angle = 0;
 
       function render() {
         window.requestAnimationFrame(render);
@@ -37,7 +43,8 @@ function Snake() {
             gl.viewport(0, 0, window.innerWidth, window.innerHeight);
           }
 
-          renderProgram(gl, program);
+          angle = (performance.now() / 1000 / 6) * 2 * Math.PI;
+          program.render(angle);
         }
       }
 
