@@ -7,7 +7,7 @@
     "start": "next start",
     "lint": "next lint",
     "build:wasm": "cd ./rust && wasm-pack build",
-    "build": "npm run build:wasm && npm run build:next"
+    "build": "npm run build:next"
   },
   "dependencies": {
     "gl-matrix": "^3.4.3",
