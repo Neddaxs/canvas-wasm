@@ -1,10 +1,10 @@
 import CoreLayout from 'components/common/layouts/CoreLayout';
-import Tanner from 'components/games/Tanner';
+import Mesh from 'components/games/Tanner/MeshLoader';
 
-export default function Home() {
+export default function TannerMesh() {
   return (
     <CoreLayout>
-      <Tanner />
+      <Mesh />
     </CoreLayout>
   );
 }

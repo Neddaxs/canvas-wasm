@@ -1,11 +1,11 @@
 import { memo, useEffect, useRef } from 'react';
 import useWasm from 'hooks/useWasm';
 
-import CubeProgram from './programs/cube';
+import MeshProgram from './programs/mesh';
 
 const FPS_THROTTLE = 1000.0 / 60.0; // milliseconds / frames;
 
-function Snake() {
+function MeshLoader() {
   const wasm = useWasm();
   const canvasRef = useRef<HTMLCanvasElement>();
 
@@ -24,7 +24,7 @@ function Snake() {
       gl.cullFace(gl.BACK);
 
       let lastDrawTime = -1; // In Milliseconds
-      const program = new CubeProgram(gl, canvas.width / canvas.height);
+      const program = new MeshProgram(gl, canvas.width / canvas.height);
       let angle = 0;
 
       function render() {
@@ -61,4 +61,4 @@ function Snake() {
   );
 }
 
-export default memo(Snake);
+export default memo(MeshLoader);
